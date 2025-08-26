@@ -1,0 +1,34 @@
+
+extract_task:
+  description: >
+    Use OCR to extract KYC fields from {s3_uri}. Output JSON with fields,
+    coverage notes, and a confidence score.
+  expected_output: >
+    JSON: {name, dob, address, id_number, has_face_photo, coverage_notes, confidence}
+
+judge_task:
+  description: >
+    Validate extraction completeness. If confidence < 0.7, write a re-extraction request
+    listing exactly what's missing and why.
+  expected_output: >
+    JSON: {passed: bool, confidence: float, rationale: str, rework_notes?: str}
+
+rules_task:
+  description: >
+    Load org rules and evaluate the case. Produce violations[] with citations and
+    a decision_hint (APPROVE or REJECT).
+  expected_output: >
+    JSON: {violations: [{code, text, citation}], decision_hint}
+
+risk_task:
+  description: >
+    Query watchlist; reconcile fuzzy matches; grade risk as LOW/MEDIUM/HIGH with explanation.
+  expected_output: >
+    JSON: {risk_grade, explanation, matches: [{name, score}]}
+
+notify_task:
+  description: >
+    Draft a final decision message to the applicant with reasons and next steps,
+    then send email via tool.
+  expected_output: >
+    JSON: {message_id}
