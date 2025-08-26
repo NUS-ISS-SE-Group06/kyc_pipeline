@@ -9,7 +9,7 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
 3. Outputs: Decision + explanation sent via email.
 
 ## Agents
-- **Planner** — Planner Agent
+- **Planner** — Planner Agent (Manager)
     - Goal: Plan & route KYC flows; request rework when confidence is low; keep provenance.
     - Backstory: Decides next steps and keeps everyone honest with logs.
     - Notes: Acts as the hierarchical manager in CrewAI (delegates tasks to other agents, aggregates outcomes).
