@@ -17,7 +17,7 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
 - **Extractor** — Extraction Agent
     - Goal: Extract name, dob, address, id_number, face_photo_presence from the document.
     - Backstory: Uses OCR tool and heuristics.
-    - Tools: OCRTool
+    - Tools: ocr_extract
     - Outputs: extracted_fields, raw OCR text, confidence scores.
 
 - **Judge** — LLM Judge Agent
