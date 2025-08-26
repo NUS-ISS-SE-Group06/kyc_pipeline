@@ -1,0 +1,66 @@
+plan_task:
+  description: >
+    Plan the end-to-end KYC flow for org={org_id}, doc={doc_id}, s3={s3_uri}.
+    Identify the sequence of tasks and any rework triggers (e.g., low confidence).
+  expected_output: |
+    JSON: {
+      "route": ["extract_task","judge_task","bizrules_task","risk_task","notify_task"],
+      "notes": "string"
+    }
+
+extract_task:
+  description: >
+    Use OCR to extract KYC fields from {s3_uri} (doc={doc_id}, org={org_id}).
+    Output JSON with fields, coverage notes, and an overall confidence score.
+  expected_output: |
+    JSON ExtractedKyc: {
+      "name": string|null,
+      "dob": string|null,
+      "address": string|null,
+      "id_number": string|null,
+      "has_face_photo": boolean|null,
+      "coverage_notes": string|null,
+      "confidence": float
+    }
+
+judge_task:
+  description: >
+    Validate extraction completeness & consistency for doc={doc_id}.
+    If confidence < 0.7, produce rework_notes explaining exactly what's missing and why.
+  expected_output: |
+    JSON JudgeVerdict: {
+      "passed": boolean,
+      "confidence": float,
+      "rationale": string,
+      "rework_notes": string|null
+    }
+
+bizrules_task:
+  description: >
+    Load organization rules for {org_id} and evaluate the case.
+    Produce violations[] with citations and a decision_hint ("APPROVE" or "REJECT").
+  expected_output: |
+    JSON RuleEvaluation: {
+      "violations": [{"code": "string", "text": "string", "citation": "string"}][],
+      "decision_hint": "APPROVE"|"REJECT"
+    }
+
+risk_task:
+  description: >
+    Query watchlists; reconcile fuzzy matches; grade risk as LOW|MEDIUM|HIGH with explanation.
+  expected_output: |
+    JSON RiskAssessment: {
+      "risk_grade": "LOW"|"MEDIUM"|"HIGH",
+      "explanation": "string",
+      "matches": [{"name": "string", "score": float}][]
+    }
+
+notify_task:
+  description: >
+    Draft a final decision message to {to_email} with reasons and next steps, then send via notifier tool.
+  expected_output: |
+    JSON FinalDecision: {
+      "decision": "APPROVE"|"REJECT"|"HUMAN_REVIEW",
+      "reasons": ["string", ...],
+      "message": "string"
+    }

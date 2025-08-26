@@ -1,15 +1,12 @@
-
 planner:
   role: Planner Agent
   goal: Plan & route KYC flows; request rework when confidence is low; keep provenance.
   backstory: Decides next steps and keeps everyone honest with logs.
-
+  
 extractor:
   role: Extraction Agent
   goal: Extract name, dob, address, id_number, face_photo_presence from the doc.
   backstory: Uses OCR tool and heuristics.
-  tools:
-    - OCRTool
 
 judge:
   role: LLM Judge Agent
