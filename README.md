@@ -46,11 +46,12 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
     brew install ollama
 ```
 
-### Start Ollama 
+### Start/Stop Ollama 
 ```bash
     cd /script
-    chmod +x start-ollama.sh
+    #permission for executable: chmod +x start-ollama.sh / chmod +x stop-ollama.sh
     ./start-ollama.sh
+    ./stop-ollama.sh
 ```
 
 ### Run LLM model llama3.2:1b 
@@ -94,7 +95,7 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
     pip install -r requirements.txt
 ```
 
-### Set .env for your keys Dependencies
+### Set .env for your keys Dependencies (Not require for local LLM )
 
 ```bash
 
