@@ -26,7 +26,7 @@ extract_task:
 judge_task:
   description: >
     Validate extraction completeness & consistency for doc={doc_id}.
-    If confidence < 0.7, produce rework_notes explaining exactly what's missing and why.
+    If confidence < 0.7 OR passed=false, you MUST produce rework_notes explaining exactly what's missing and why.
   expected_output: |
     JSON JudgeVerdict: {
       "passed": boolean,

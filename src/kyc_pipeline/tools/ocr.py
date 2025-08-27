@@ -1,4 +1,3 @@
-
 from crewai.tools import tool
 
 @tool("ocr_extract")

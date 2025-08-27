@@ -1,0 +1,102 @@
+judge_task:
+  description: >
+    Validate extraction completeness & consistency for doc={doc_id}.
+    If confidence < 0.7 OR passed=false, you MUST produce rework_notes.
+    rework_notes is a short, numbered list: (where, what, fix).
+
+  inputs:
+    - name: extracted
+      type: object
+    - name: required_fields
+      type: string[]
+    - name: page_map
+      type: object
+
+  constraints:
+    - "No hallucinations; return null for unknown."
+    - "Cite only provided pages/regions."
+    - "Use ISO dates (YYYY-MM-DD)."
+
+  rubric:
+    completeness_weight: 0.6
+    consistency_weight: 0.4
+    pass_if:
+      - "all required_fields present"
+      - "no critical mismatches"
+    confidence_guidelines:
+      - ">=0.9: zero issues"
+      - "0.7–0.89: minor issues"
+      - "<0.7: major issues (rework_notes required)"
+
+  field_checks:
+    date_of_birth: { required: true, pattern: '^\d{4}-\d{2}-\d{2}$' }
+
+  tool:
+    name: set_judge_verdict
+    parameters:
+      type: object
+      properties:
+        passed: { type: boolean }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+        rationale: { type: string, minLength: 1 }
+        rework_notes:
+          oneOf:
+            - { type: string, minLength: 5 }
+            - { type: null }
+      required: [passed, confidence, rationale, rework_notes]
+    force_tool: true
+
+  evidence:
+    required: true
+    schema:
+      type: array
+      items:
+        type: object
+        properties:
+          field: { type: string }
+          page: { type: integer }
+          region: { type: string }
+        required: [field, page]
+    max_items: 5
+
+  formatting:
+    response_must_be: "single strict JSON; no markdown"
+    rework_notes_style: "numbered; one line per item; <=5 items"
+    max_chars:
+      rationale: 500
+      rework_notes: 700
+
+  validation_policy:
+    require_rework_notes_if: ["!passed", "confidence < 0.7"]
+    normalize_null_when: ["passed && confidence >= 0.7"]
+    retry_on_invalid: 1
+
+  routing:
+    on_pass: "agent-notification:success"
+    on_fail: "agent-extractor:rework"
+
+  limits:
+    max_tokens: 300
+    temperature: 0.1
+    timeout_seconds: 20
+
+  expected_output: |
+    JSON JudgeVerdict: {
+      "passed": boolean,
+      "confidence": float,
+      "rationale": string,
+      "rework_notes": string|null,
+      "field_evidence": [{"field": string, "page": number, "region": string?}]
+    }
+
+  examples:
+    - input: "<extracted JSON, required_fields, page refs>"
+      output: |
+        {"passed": false, "confidence": 0.62, "rationale":"...", 
+         "rework_notes":"1) P1/DOB: missing; fix: extract YYYY-MM-DD. 2) P2/Address lower-right: parse street/city/postal. 3) Name mismatch P1 vs P2: fix by choosing ID-front canonical.",
+         "field_evidence":[{"field":"date_of_birth","page":1},{"field":"address","page":2,"region":"lower-right"}]}
+    - input: "<clean case>"
+      output: |
+        {"passed": true, "confidence": 0.93, "rationale":"All required fields present and consistent.",
+         "rework_notes": null,
+         "field_evidence":[{"field":"full_name","page":1},{"field":"date_of_birth","page":1}]}
