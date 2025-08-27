@@ -35,7 +35,7 @@ judge_task:
 
     OUTPUT CONTRACT
     - Return ONE strict JSON object only (no markdown, no comments, no prose outside JSON).
-    - Keys required: passed:boolean, confidence:0..1, rationale:string, rework_notes:string|null, rule_violation:string|null (if you use it).
+    - Keys required: passed:boolean, confidence:0..1, rationale:string, rework_notes:string|null.
     - If passed=false OR confidence<0.7 OR rules were violated, you MUST provide rework_notes as a short, numbered list: (where: page/region/label), (what: missing/wrong), (fix: action).
     - If information is unknown, return null (do not invent values).
     - Clamp confidence to [0,1].
