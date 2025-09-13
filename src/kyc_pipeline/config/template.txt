@@ -100,3 +100,35 @@ judge_task:
         {"passed": true, "confidence": 0.93, "rationale":"All required fields present and consistent.",
          "rework_notes": null,
          "field_evidence":[{"field":"full_name","page":1},{"field":"date_of_birth","page":1}]}
+
+
+
+
+
+
+Searched agent.yml attributes configuration file
+The agent.yml file contains configuration attributes for defining agents in CrewAI. Here are the key attributes you can use:
+
+Required Attributes:
+
+role - Defines the agent's function and expertise
+goal - The individual objective guiding the agent's decisions
+backstory - Provides context and personality to the agent
+Optional Attributes:
+
+llm - Language model (defaults to OPENAI_MODEL_NAME or "gpt-4")
+tools - List of capabilities/functions available to the agent
+verbose - Enable detailed execution logs (default: False)
+allow_delegation - Allow task delegation to other agents (default: False)
+max_iter - Maximum iterations before providing best answer (default: 20)
+max_rpm - Maximum requests per minute
+max_execution_time - Maximum time in seconds for task execution
+cache - Enable caching for tool usage (default: True)
+system_template - Custom system prompt template
+prompt_template - Custom prompt template
+response_template - Custom response template
+The YAML configuration provides a clean, maintainable way to define agents that can be version controlled and shared across teams.
+
+
+
+
