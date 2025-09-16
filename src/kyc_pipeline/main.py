@@ -4,7 +4,7 @@ def run():
     inputs = {
         "doc_id": "KYC-2025-0001",
         #"s3_uri": "s3://incoming/kyc.pdf",
-        "s3_uri": "/Users/<????>/nus/kyc_pipeline/test/idcard_john_doe.jpg",
+        "s3_uri": "/Users/<????>/nus/kyc_pipeline/test/idcard_john_doe.jpg", 
         "org_id": "test-sg",
         "to_email": "applicant@example.com"
     }
