@@ -123,6 +123,21 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
     - `send_decision_email(to_email, ...)`,
     - `persist_runlog(...)`.
 
+
+## Builds & run locally
+```bash
+
+# Build
+docker build -t kyc-pipeline:dev .
+
+# Run (CLI)
+docker run --rm \
+  -e OPENAI_API_KEY=your_key_here 
+  kyc-pipeline:dev
+
+
+```
+
 ## Out-of-the-box Tools
 https://docs.crewai.com/en/tools/overview
 
