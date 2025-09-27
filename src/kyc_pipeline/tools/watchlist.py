@@ -1,5 +1,5 @@
 from crewai.tools import tool
-import json
+import json, sys, time
 
 # --- Test dataset (5 records) ---
 _WATCHLIST = [
@@ -39,6 +39,8 @@ def _id_score(query: str, candidate: str) -> float:
 @tool("watchlist_search")
 def watchlist_search(name: str = "", id_number: str = "") -> str:
     """Return watchlist matches by simple plain-text comparison against a small stub dataset."""
+    stamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    print(f"[{stamp}] watchlist_search CALLED with name='{name}', id_number='{id_number}'", file=sys.stderr, flush=True)
     if not name and not id_number:
         raise ValueError("Provide at least name or id_number")
 
