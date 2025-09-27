@@ -18,7 +18,7 @@ class KYCPipelineCrew:
     def _local_llm(self) -> LLM:
         return LLM(
             # model="ollama/gpt-oss:20b",
-            model="ollama/llama3.2:1b",
+            model="ollama/llama3.2-vision:11b",
             base_url="http://localhost:11434",
             temperature=0.2,
     )
@@ -67,6 +67,7 @@ class KYCPipelineCrew:
             tools=[watchlist_search, persist_runlog], 
             verbose=True,
             llm=self._local_llm(),
+            allow_delegation=False
         )
 
     @agent
