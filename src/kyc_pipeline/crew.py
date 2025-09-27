@@ -17,6 +17,7 @@ class KYCPipelineCrew:
     # ---- Local LLM via Ollama (using llama3.2:1b) ----
     def _local_llm(self) -> LLM:
         return LLM(
+            # model="ollama/gpt-oss:20b",
             model="ollama/llama3.2:1b",
             base_url="http://localhost:11434",
             temperature=0.2,
