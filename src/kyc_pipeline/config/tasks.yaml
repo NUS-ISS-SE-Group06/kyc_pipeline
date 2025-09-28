@@ -77,11 +77,12 @@ risk_task:
   description: >
     Perform a watchlist screen for the extracted entity.
     You MUST call the tool `watchlist_search` with the best arguments you can infer from the inputs (name, id_number). Do not guess the result without calling it.
+    Use name & id_number from extract task response
     Based on the score field value under matches tag, grade risk as LOW|MEDIUM|HIGH
     if the score is 0.0, risk is LOW. 
     if score is greater than 0.0 and lesser than 0.5, risk is MEDIUM. 
     if score is higher than 0.5, risk is HIGH.
-    Call this service exactly once.
+    Call this task exactly once. you may not use ‘Ask/Delegate to coworker’. Run the task once and proceed.
   expected_output: |
     JSON RiskAssessment: {
       "risk_grade": "LOW"|"MEDIUM"|"HIGH",
