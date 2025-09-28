@@ -10,7 +10,7 @@ plan_task:
 
 extract_task:
   description: >
-    Use OCR to extract KYC fields from {s3_uri} (doc={doc_id}, org={org_id}).
+    Use OCR to extract KYC fields from {s3_uri} (doc={doc_id}, org={org_id}). Call this service exactly once.
     Output JSON with fields, coverage notes, and an overall confidence score.
   expected_output: |
     JSON ExtractedKyc: {
@@ -37,6 +37,7 @@ judge_task:
   description: >
     Validate extraction completeness & consistency for doc={doc_id}.
     If confidence < 0.7 OR passed=false, you MUST produce rework_notes explaining exactly what's missing and why.
+    Call this service exactly once.
   expected_output: |
     JSON JudgeVerdict: {
       "passed": boolean,
@@ -65,6 +66,7 @@ bizrules_task:
   description: >
     Load organization rules for {org_id} and evaluate the case.
     Produce violations[] with citations and a decision_hint ("APPROVE" or "REJECT").
+    Call this service exactly once.
   expected_output: |
     JSON RuleEvaluation: {
       "violations": [{"code": "string", "text": "string", "citation": "string"}][],
@@ -79,6 +81,7 @@ risk_task:
     if the score is 0.0, risk is LOW. 
     if score is greater than 0.0 and lesser than 0.5, risk is MEDIUM. 
     if score is higher than 0.5, risk is HIGH.
+    Call this service exactly once.
   expected_output: |
     JSON RiskAssessment: {
       "risk_grade": "LOW"|"MEDIUM"|"HIGH",
@@ -89,6 +92,7 @@ risk_task:
 notify_task:
   description: >
     Draft a final decision message to {to_email} with reasons and next steps, then send via notifier tool.
+    Call this service exactly once.
   expected_output: |
     JSON FinalDecision: {
       "decision": "APPROVE"|"REJECT"|"HUMAN_REVIEW",
