@@ -40,6 +40,7 @@ class KYCPipelineCrew:
             tools=[ocr_extract, persist_runlog], 
             verbose=True,
             llm=self._local_llm(),
+            max_iter=1
         )
 
     @agent
@@ -48,7 +49,8 @@ class KYCPipelineCrew:
             config=self.agents_config['judge'], 
             tools=[persist_runlog], 
             verbose=True,
-             llm=self._local_llm(),
+            llm=self._local_llm(),
+            max_iter=1
         )
 
     @agent
@@ -57,7 +59,8 @@ class KYCPipelineCrew:
             config=self.agents_config['bizrules'], 
             tools=[fetch_business_rules, persist_runlog], 
             verbose=True,
-             llm=self._local_llm(),
+            llm=self._local_llm(),
+            max_iter=1
         )
 
     @agent
@@ -67,7 +70,8 @@ class KYCPipelineCrew:
             tools=[watchlist_search, persist_runlog], 
             verbose=True,
             llm=self._local_llm(),
-            allow_delegation=False
+            allow_delegation=False,
+            max_iter=1
         )
 
     @agent
@@ -77,6 +81,7 @@ class KYCPipelineCrew:
             tools=[send_decision_email, persist_runlog], 
             verbose=True,
             llm=self._local_llm(),
+            max_iter=1
         )
 
     # ──────────────── Tasks ────────────────
