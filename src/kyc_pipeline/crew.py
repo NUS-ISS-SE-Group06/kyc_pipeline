@@ -66,10 +66,12 @@ class KYCPipelineCrew:
     @agent
     def risk(self) -> Agent:
         return Agent(
-            config=self.agents_config['risk'], 
-            tools=[watchlist_search, persist_runlog], 
+            tools=[watchlist_search, persist_runlog],
             verbose=True,
             llm=self._local_llm(),
+            role="Fraud-Risk Agent",
+            goal="Run watchlist screening and output a single risk decision.",
+            backstory="Grades risk based on watchlist matches; no coworker chatter.",
             allow_delegation=False,
             max_iter=1
         )
