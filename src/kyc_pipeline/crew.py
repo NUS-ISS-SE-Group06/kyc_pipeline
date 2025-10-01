@@ -14,7 +14,7 @@ class KYCPipelineCrew:
 
     agents_config = 'config/agents.yaml'
     tasks_config  = 'config/tasks.yaml'
-
+    
 
     # ──────────────── Agents ────────────────
     @agent  #manager
@@ -33,6 +33,7 @@ class KYCPipelineCrew:
             tools=[ocr_extract, persist_runlog], 
             verbose=True,
             llm=llmrouter(),
+            max_iter=1
         )
 
     @agent
@@ -42,7 +43,7 @@ class KYCPipelineCrew:
             tools=[persist_runlog], 
             verbose=True,
             llm=llmrouter(),
-            max_iter=2,
+            max_iter=1,
         )
 
     @agent
@@ -52,15 +53,20 @@ class KYCPipelineCrew:
             tools=[fetch_business_rules, persist_runlog], 
             verbose=True,
             llm=llmrouter(),
+            max_iter=1
         )
 
     @agent
     def risk(self) -> Agent:
         return Agent(
-            config=self.agents_config['risk'], 
-            tools=[watchlist_search, persist_runlog], 
+            tools=[watchlist_search, persist_runlog],
             verbose=True,
             llm=llmrouter(),
+            role="Fraud-Risk Agent",
+            goal="Run watchlist screening and output a single risk decision.",
+            backstory="Grades risk based on watchlist matches; no coworker chatter.",
+            allow_delegation=False,
+            max_iter=1
         )
 
     @agent
@@ -70,6 +76,7 @@ class KYCPipelineCrew:
             tools=[send_decision_email, persist_runlog], 
             verbose=True,
             llm=llmrouter(),
+            max_iter=1
         )
 
     # ──────────────── Tasks ────────────────
