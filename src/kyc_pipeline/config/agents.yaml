@@ -1,6 +1,6 @@
 planner:
   role: Planner Agent
-  goal: >
+  goal: |
     Orchestrate the KYC flow deterministically:
     1) Run Extract once (must return normalized JSON schema),
     2) Run Judge,
@@ -8,7 +8,7 @@ planner:
     4) Run Risk (must call watchlist & grading once),
     5) Hand off to Notifier.
   backstory: Decides next steps and preserves a run log with minimal backtracking.
-  rules:
+  rules: |
     - Never re-run a completed task unless input changed.
     - Do not use coworker/ask-delegate tools during Extract or Risk.
     - Stop after Notifier completes.
@@ -21,7 +21,7 @@ extractor:
     {name, dob, address, id_number, has_face_photo, confidence}.
     If confidence cannot be computed, set confidence=0.80.
   backstory: OCR + parsing specialist with schema discipline.
-  constraints:
+  constraints: |
     - allow_delegation: false
     - max_iterations: 1
     - never call ocr_extract twice for the same s3_uri in a run
@@ -49,7 +49,7 @@ bizrules:
     Evaluate org rules ({{doc_type}}) on the normalized fields.
     Return JSON: {violations:[], hint, citations:[]}.
   backstory: Rule wonk with a love for citations—no speculation.
-  constraints:
+  constraints: >
     - max_iterations: 1
 
 risk:
@@ -59,7 +59,7 @@ risk:
     then MUST call `grade_risk(matches_json)` to compute {risk_grade, explanation}.
     Return JSON: {risk_grade, explanation, matches:[]}.
   backstory: Careful with ambiguous matches; escalate on HIGH.
-  constraints:
+  constraints: |
     - allow_delegation: false
     - max_iterations: 1
     - no coworker/ask-delegate tools
@@ -70,6 +70,6 @@ notifier:
     Draft a concise decision email using Judge, BizRules, and Risk outputs,
     then call the notification tool to send to {{to_email}}.
   backstory: Explains outcomes clearly and kindly.
-  constraints:
+  constraints: |
     - must include risk_grade and any rule violations in the message
     - max_iterations: 1
