@@ -23,6 +23,7 @@ class KYCPipelineCrew:
             config=self.agents_config['planner'], 
             verbose=True, 
             memory=False,
+            tools=[],
             llm=llmrouter(),
         )
 
@@ -30,10 +31,11 @@ class KYCPipelineCrew:
     def extractor(self) -> Agent:
         return Agent(
             config=self.agents_config['extractor'],
-            tools=[ocr_extract, persist_runlog], 
+            tools=[ocr_extract, persist_runlog],
             verbose=True,
             llm=llmrouter(),
-            max_iter=1
+            max_iter=1,
+            allow_delegation=False   # <- prevents coworker ping-pong
         )
 
     @agent
@@ -84,7 +86,8 @@ class KYCPipelineCrew:
     def extract_task(self) -> Task:
         return Task(
             config=self.tasks_config['extract_task'], 
-            agent=self.extractor(), 
+            agent=self.extractor(),
+            verbose=True
         )
 
     @task
