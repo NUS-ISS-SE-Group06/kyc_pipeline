@@ -12,6 +12,8 @@ extract_task:
   description: >
     Use OCR to extract KYC fields from {s3_uri} (doc={doc_id}, org={org_id}). Call this service exactly once.
     Output JSON with fields, coverage notes, and an overall confidence score.
+    MUST call ocr_extract({{s3_uri}}) exactly once and return normalized JSON: {name,dob,address,id_number,has_face_photo,confidence}.
+    If confidence unavailable, set 0.80. Do not ask/delegate to coworkers. Do not re-run.
   expected_output: |
     JSON ExtractedKyc: {
       "name": string|null,
