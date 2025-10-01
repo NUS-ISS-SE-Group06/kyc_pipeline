@@ -138,3 +138,17 @@ uv run -m pytest -q
 # Verbose and filtered run
 uv run -m pytest -vv tests/test_tools_ocr.py::test_ocr_extract_returns_expected_stub_text
 ```
+
+You can run server process via `uvicorn`.
+
+```bash
+uv run uvicorn kyc_pipeline.api:app --host 0.0.0.0 --port 8000
+
+# ping test
+curl http://localhost:8000/ping
+
+# run crewAI KYC
+curl -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{"doc_id":"KYC-1","s3_uri":"s3://bucket/file.jpg","doc_type":"KYC","to_email":"user@example.com"}'
+```
