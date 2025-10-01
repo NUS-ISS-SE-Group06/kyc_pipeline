@@ -107,7 +107,7 @@ To kickstart your crew of AI agents and begin task execution, run this from the 
 - CrewAI substitutes values from the inputs dict you pass to kickoff.
 - Agents then use tools:
     - `ocr_extract(s3_uri)` (stub; replace with Textract),
-    - `fetch_business_rules(org_id)`,
+    - `fetch_business_rules(doc_type)`,
     - `watchlist_search(...)`,
     - `send_decision_email(to_email, ...)`,
     - `persist_runlog(...)`.

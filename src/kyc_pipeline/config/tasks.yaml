@@ -10,7 +10,7 @@ plan_task:
 
 extract_task:
   description: >
-    Use OCR to extract KYC fields from {s3_uri} (doc={doc_id}, org={org_id}). Call this service exactly once.
+    Use OCR to extract KYC fields from {s3_uri} (doc={doc_id}, type={doc_type}). Call this service exactly once.
     Output JSON with fields, coverage notes, and an overall confidence score.
   expected_output: |
     JSON ExtractedKyc: {
@@ -76,7 +76,7 @@ judge_task:
 
 bizrules_task:
   description: >
-    Load organization rules for {org_id} and evaluate the case.
+    Load organization rules for {doc_type} and evaluate the case.
     Produce violations[] with citations and a decision_hint ("APPROVE" or "REJECT").
     Call this service exactly once.
   expected_output: |

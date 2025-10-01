@@ -46,7 +46,7 @@ judge:
 bizrules:
   role: Business-Rule Agent
   goal: >
-    Evaluate org rules ({{org_id}}) on the normalized fields.
+    Evaluate org rules ({{doc_type}}) on the normalized fields.
     Return JSON: {violations:[], hint, citations:[]}.
   backstory: Rule wonk with a love for citations—no speculation.
   constraints:

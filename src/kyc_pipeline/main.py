@@ -6,7 +6,7 @@ def run():
         "doc_id": "KYC-2025-0001",
         #"s3_uri": "s3://incoming/kyc.pdf",
         "s3_uri": "/Users/balajisivaprakasam/nus/kyc_pipeline/test/idcard_john_doe.jpg",
-        "org_id": "test-sg",
+        "doc_type": "KYC",
         "to_email": "applicant@example.com"
     }
 

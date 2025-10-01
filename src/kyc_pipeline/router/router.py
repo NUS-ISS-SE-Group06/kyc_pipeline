@@ -4,11 +4,13 @@ import requests
 
 def _ping_ollama (base_url: str, timeout =2.0) -> bool:
     try:
-        r = requests.get(f"{base_url}",timeout=timeout)
-        r.ok()
-        return True
+        r = requests.get(f"{base_url}/api/tags",timeout=timeout)
+        if r.status_code == 200:
+            return True
+        else:
+            raise RuntimeError(f"Ping test failed: HTTP {r.status_code}")
     except Exception as e:
-        raise RuntimeError(f"Ping test failed")
+        raise RuntimeError(f"Ping test failed: {e}")
 
 
 def llmrouter(model_name: Optional[str] = None, temperature: float = 0.05) -> LLM:
@@ -20,29 +22,42 @@ def llmrouter(model_name: Optional[str] = None, temperature: float = 0.05) -> LL
     """
     try:
         if model_name and model_name.lower() == "llama3.1:8b":
-            llm=LLM(
-                model="ollama/llama3.1:8b",
-                base_url="http://localhost:11434",
+            # attempt to connect to http://localhost:11434/api/tags
+            url="http://localhost:11434"
+            _ping_ollama(url)
+            
+            return LLM(
+                model="llama3.1:8b",
+                base_url=url,
                 temperature=temperature,
             )
         elif model_name and model_name.lower() == "llama3.2:7b":
-            llm=LLM(
-                model="ollama/llama3.2:7b",
-                base_url="http://localhost:11434",
-                temperature=temperature,
-            )
-        else:
-            llm= LLM(
-                model="ollama/llama3.2:3b",
-                base_url="http://localhost:11434",
-                temperature=temperature,
-            )
-        _ping_ollama(llm.base_url)
+            # attempt to connect to http://localhost:11434/api/tags
+            url="http://localhost:11434"
+            _ping_ollama(url)
 
-    # fallback
+            return LLM(
+                model="llama3.2:7b",
+                base_url=url,
+                temperature=temperature,
+            )
+       
+        # Default LLM
+        else:
+            # attempt to connect to http://localhost:11434/api/tags
+            url="http://localhost:11434"
+            _ping_ollama(url)
+            
+            return LLM(
+                model="ollama/llama3.2-vision:11b",
+                base_url=url,
+                temperature=temperature,
+            )
+        
+    # Fallback
     except Exception:
         return LLM(
-            model="ollama/llama3.2:1b",
+            model="ollama/llama3.2-vision:12b",
             base_url="http://localhost:11434",
             temperature=temperature,
         )
