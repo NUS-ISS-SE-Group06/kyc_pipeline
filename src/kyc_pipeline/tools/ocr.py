@@ -30,7 +30,7 @@ def _stub_payload_for(uri: str):
         "coverage_notes": "Global fallback stub"
     })
 
-def ocr_extract(s3_uri: str) -> str:
+def ocr_extract_pure(s3_uri: str) -> str:
     """
     Return OCR result as a JSON string with normalized keys.
     In stub mode (OCR_MODE=stub), return canned data based on file name.
