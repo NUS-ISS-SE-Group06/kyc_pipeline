@@ -1,0 +1,31 @@
+[project]
+name = "kyc_pipeline"
+version = "0.1.0"
+description = "KYC Pipeline using crewAI"
+requires-python = ">=3.13.2"
+dependencies = [
+    "crewai[tools]>=0.186.1,<1.0.0",
+    "pydantic>=2.11.8",
+    "python-dotenv>=1.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.9.0",
+    "mypy>=1.18.2",
+    "pytest>=8.4.2",
+]
+[project.scripts]
+kyc_pipeline = "kyc_pipeline.main:run"
+run_crew = "kyc_pipeline.main:run"
+train = "kyc_pipeline.main:train"
+replay = "kyc_pipeline.main:replay"
+test = "kyc_pipeline.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"
+

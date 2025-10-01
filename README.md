@@ -4,9 +4,10 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
 
 
 ## How it runs (end-to-end)
-1. Trigger: New file in S3 → Lambda invokes crew.kickoff(inputs={...}).
-2. Process: ManagerCrew (hierarchical) delegates YAML tasks to agents; each agent uses a deterministic tool (OCR, rules engine, vector search) or a constrained LLM check.
-3. Outputs: Decision + explanation sent via email.
+1. **Trigger**: New KYC file uploaded to **S3**
+2. **Process**: The S3 event invokes the **CrewAI endpoint**.
+3. **Execution**: ManagerCrew(hierarchical) orchestrates YAML-defined tasks. Agents rely on deterministic tools and constrained LLM checks.
+3. **Outputs**: Final Decision + explaination are produced and stored to persistent.
 
 ## Agents
 - **Planner** — Planner Agent (Manager)
@@ -20,7 +21,7 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
     - Tools: ocr_extract
     - Outputs: extracted_fields, raw OCR text, confidence scores.
 
-- **Judge** — LLM Judge Agent
+- **Judge** — Judgement Agent
     - Goal: Validate completeness; produce pass/fail with rationale & confidence; ask rework if needed.
     - Backstory: Structured QA and reflection.
     - Outputs: judge.verdict, judge.rationale, judge.confidence.
@@ -34,81 +35,69 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
     - Goal: Watchlist check with fuzzy reconciliation; produce risk grade & explanation.
     - Backstory: Careful with ambiguous matches; escalate on HIGH.
     - Outputs: risk.grade (e.g., LOW/MED/HIGH), risk.matches[], risk.explanation.
-- **Notifier** — Notifier Agent
+- **Decision** — Decision Agent
     - Goal: Draft clear decision message; call notification tool to send.
     - Backstory: Explains outcomes to humans kindly and clearly.
     - Outputs: message.draft, message.channel, message.status.
 
 ## Quick start
 
-### Install Ollama 
+### Installation 
+
+First, if you haven't already, install `ollama` and `uv`
+
 ```bash
     brew install ollama
+    pip install uv
+    uv --version
 ```
 
-### Start/Stop Ollama 
+#### Start/Stop Ollama 
+Next, go to `/script` directory
+
 ```bash
-    cd /script
-    #permission for executable: chmod +x start-ollama.sh / chmod +x stop-ollama.sh
+    #set executable permission: 
+    #chmod +x start-ollama.sh / chmod +x stop-ollama.sh
+    cd /script  
+
+    # Start Ollama    
     ./start-ollama.sh
+
+    # Stop Ollama
     ./stop-ollama.sh
 ```
 
-### Run LLM model llama3.2:1b 
+#### Run LLM model
+Next, once ollama is up, you can Run any LLM model, here we are using `llama3.2:1b`
 ```bash
     ollama run llama3.2:1b
 ```
 
-
-### Install Python Version Manager
+Next, navigate to your project directory and install the dependencies:
 
 ```bash
-    cd /kyc_pipeline
-
-    brew update
-    brew install pyenv
-    # Enable in your shell (Bash/Zsh); add these lines to ~/.zshrc or ~/.bashrc:
-    echo 'eval "$(pyenv init -)"' >> ~/.zshrc
-    exec $SHELL -l  # restart shell
+    crewai install
 ```
 
-### Install Python 3.13.2
+or
 
 ```bash
-    pyenv install 3.13.2          # builds and installs into ~/.pyenv/versions/3.13.2
-    pyenv local 3.13.2            # writes .python-version in the current project
-    python -V                     # should show Python 3.13.2
+    uv sync
 ```
 
-### Create Virtual Environnment
+### Customizing
+
+**Update `.env` file**
+
+- Rename `env.example` to `.env`
+- Modify `OPENAI_API_KEY`
+
+## :rocket: How To Run
+
+To kickstart your crew of AI agents and begin task execution, run this from the root folder of your project:
 
 ```bash
-    python -m venv .venv
-    source .venv/bin/activate    
-    pip install --upgrade pip  
-    pip install -U pip setuptools wheel    # python package chain tools
-```
-
-### Install Dependencies
-
-```bash
-    pip install -r requirements.txt
-```
-
-### Set .env for your keys Dependencies (Not require for local LLM )
-
-```bash
-
-    cp .env.example .env
-    vi .env  # Set OPENAI_API_KEY and save
-```
-
-### Run as script
-
-```bash
-    cd /src/
-
-    python -m kyc_pipeline.main
+    crewai run
 ```
 
 ## Workflow
@@ -123,12 +112,13 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
     - `send_decision_email(to_email, ...)`,
     - `persist_runlog(...)`.
 
-## Out-of-the-box Tools
-https://docs.crewai.com/en/tools/overview
 
-## SDK
-https://docs.crewai.com/en/examples/example#flows
+## Development
+You can run unit tests via `pytest`. 
 
-## OpenAI Platform
-https://platform.openai.com/docs/api-reference/introduction
+```bash
+uv run -m pytest -q
 
+# Verbose and filtered run
+uv run -m pytest -vv tests/test_tools_ocr.py::test_ocr_extract_returns_expected_stub_text
+```
