@@ -46,7 +46,7 @@ bizrules:
     Evaluate org rules ({{doc_type}}) on the normalized fields.
     Return JSON: {violations:[], hint, citations:[]}.
   backstory: Rule wonk with a love for citations—no speculation.
-  constraints: >
+  constraints: |
     - max_iterations: 1
 
 risk:
