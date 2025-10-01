@@ -52,6 +52,8 @@ htmlcov/
 
 # OS files
 .DS_Store
+**__pycache__**
+.env
 Thumbs.db
 
 # Logs

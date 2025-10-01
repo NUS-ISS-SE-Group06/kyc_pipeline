@@ -30,7 +30,6 @@ def _stub_payload_for(uri: str):
         "coverage_notes": "Global fallback stub"
     })
 
-@tool("ocr_extract")
 def ocr_extract(s3_uri: str) -> str:
     """
     Return OCR result as a JSON string with normalized keys.
@@ -47,3 +46,4 @@ def ocr_extract(s3_uri: str) -> str:
     # parsed = parse_text_to_fields(text)
     # return json.dumps({"extracted": parsed})
     return json.dumps({"extracted": _stub_payload_for(s3_uri)})  # temporary until real OCR wired
+ocr_extract = tool("ocr_extract")(ocr_extract_pure)
