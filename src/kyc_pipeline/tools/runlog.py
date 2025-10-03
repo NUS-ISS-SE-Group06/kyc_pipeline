@@ -1,4 +1,3 @@
-# src/kyc_pipeline/tools/runlog.py
 from crewai.tools import tool
 from pathlib import Path
 from datetime import datetime
