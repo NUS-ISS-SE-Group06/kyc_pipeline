@@ -71,10 +71,10 @@ Next, go to `/script` directory
 
 #### Run LLM model
 
-Next, once ollama is up, you can Run any LLM model, here we are using `llama3.2:1b`
+Next, once ollama is up, you can Run any LLM model, here we are using `llama3.2:3b`
 
 ```bash
-    ollama run llama3.2:1b
+    ollama run llama3.2:3b
 ```
 
 Next, navigate to your project directory and install the dependencies:

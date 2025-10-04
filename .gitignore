@@ -73,4 +73,4 @@ logs/
 *.swp
 *.swo
 
-runlogs
+runlogs/*
