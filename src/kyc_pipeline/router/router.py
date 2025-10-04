@@ -45,7 +45,7 @@ def llmrouter(model_name: str = "gpt-5-nano", temperature: float = 0.05) -> LLM:
         # Default: Openai GPT
         #gpt-4o-mini   1M Token, Input $ 0.15 Output $0.6
         #gpt-4.1-mini  1M Token, Input $ 0.4 Output $1.6
-        #gpt-5-nano  1M Token, Input $ 0.05 Output $0.4
+        #gpt-5-nano    1M Token, Input $ 0.05 Output $0.4
         _ping_openai(model_name)
         return LLM(
             model=model_name,
