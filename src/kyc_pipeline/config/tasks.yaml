@@ -4,7 +4,7 @@ plan_task:
     Identify the sequence of tasks and any rework triggers (e.g., low confidence).
   expected_output: |
     JSON: {
-      "route": ["extract_task","bizrules_task","judge_task","risk_task","notify_task"],
+      "route": ["extract_task","judge_task","bizrules_task","risk_task","notify_task"],
       "notes": "string"
     }
 
