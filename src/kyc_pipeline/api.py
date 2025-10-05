@@ -1,4 +1,5 @@
 from fastapi import FastAPI, BackgroundTasks, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pathlib import Path
 from typing import Optional, List
@@ -12,6 +13,17 @@ from .crew import KYCPipelineCrew
 load_dotenv()
 
 app = FastAPI(title="KYC Pipeline API")
+
+# CORS
+raw_origins = os.getenv("ALLOWED_ORIGINS")
+origins = [o.strip() for o in str(raw_origins).split(",") if o.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class KYCInput(BaseModel):
     doc_id: str
