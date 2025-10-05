@@ -1,6 +1,7 @@
 from crewai.tools import tool
 from pathlib import Path
 from datetime import datetime
+from typing import Union
 import os, json
 
 def _ensure_str(s) -> str:
@@ -10,7 +11,7 @@ def _ensure_str(s) -> str:
 
 @tool("persist_runlog")
 def persist_runlog(
-        payload_json: str,
+        payload_json: Union[str, dict, list],
         out_dir: str = "runlogs",
         filename: str = "runlog.json",   # <- always overwrite this file
 ) -> str:
