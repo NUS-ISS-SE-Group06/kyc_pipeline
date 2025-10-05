@@ -1,0 +1,43 @@
+# .dockerignore
+
+# Virtual environments
+.venv
+venv
+env
+*.pyc
+__pycache__
+
+# GitHub workflows
+.github
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Testing
+.pytest_cache
+.coverage
+htmlcov
+
+# Documentation
+*.md
+docs/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+*.egg-info
