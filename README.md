@@ -48,7 +48,6 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
 First, if you haven't already, install `ollama` and `uv`
 
 ```bash
-    brew install ollama
     pip install uv
     uv --version
 ```
