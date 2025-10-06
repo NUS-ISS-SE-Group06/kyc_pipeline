@@ -41,7 +41,7 @@ def llmrouter(model_name: str = "gpt-5-nano", temperature: float = 0.05) -> LLM:
     
     fallback_model_name="gpt-4.1-mini"
     ollama_base = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-    ollama_model = os.getenv("OLLAMA_MODEL", "llama3")
+    ollama_model = os.getenv("OLLAMA_MODEL", "llama3:8b")
     try:
 
         # 1️⃣ Try Ollama first
