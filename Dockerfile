@@ -40,6 +40,7 @@ WORKDIR /app
 COPY --from=builder /build/.venv /app/.venv
 COPY --from=builder /build/pyproject.toml /build/uv.lock ./
 COPY --from=builder /build/src ./src
+COPY data/ /app/data/
 
 # Clean up
 RUN find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
