@@ -45,35 +45,11 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
 
 ### Installation
 
-First, if you haven't already, install `ollama` and `uv`
+First, if you haven't already, install `uv`
 
 ```bash
     pip install uv
     uv --version
-```
-
-#### Start/Stop Ollama
-
-Next, go to `/script` directory
-
-```bash
-    #set executable permission: 
-    #chmod +x start-ollama.sh / chmod +x stop-ollama.sh
-    cd /script  
-
-    # Start Ollama    
-    ./start-ollama.sh
-
-    # Stop Ollama
-    ./stop-ollama.sh
-```
-
-#### Run LLM model
-
-Next, once ollama is up, you can Run any LLM model, here we are using `llama3.2:3b`
-
-```bash
-    ollama run llama3.2:3b
 ```
 
 Next, navigate to your project directory and install the dependencies:
