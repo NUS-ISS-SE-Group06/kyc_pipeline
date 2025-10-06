@@ -9,6 +9,7 @@ def ocr_extract(s3_uri: str) -> str:
     """Extract raw text from a document at s3_uri. (Stub for demo)."""
     """Extract text from an image using Tesseract OCR.
     Supports PNG, JPG, TIFF, PDF (if converted to image)."""
+    image_path = s3_uri
     # Load image with OpenCV for preprocessing
     image = cv2.imread(image_path)
 

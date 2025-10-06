@@ -1,7 +1,7 @@
 from datetime import datetime
 from kyc_pipeline.crew import KYCPipelineCrew
-from .crew import KYCPipelineCrew
-from tools.ocr import ocr_extract
+from kyc_pipeline.tools.ocr import ocr_extract
+
 
 def run():
     inputs = {
@@ -14,7 +14,13 @@ def run():
     }
 
     try:
+        # Run the Crew pipeline
         result = KYCPipelineCrew().crew().kickoff(inputs=inputs)
-        ocr_extract(input)
+        print("🚀 Crew pipeline result:", result)
+
+         # Run OCR on the document
+        ocr_text = ocr_extract(inputs["s3_uri"])
+        print("🧾 OCR Extracted Text:\n", ocr_text)
+
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
