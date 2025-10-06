@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 from crewai import LLM
 import requests
 from openai import OpenAI
