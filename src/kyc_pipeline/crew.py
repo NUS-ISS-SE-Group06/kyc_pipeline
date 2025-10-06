@@ -1,4 +1,3 @@
-
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
 from .tools.ocr import ocr_extract
@@ -6,6 +5,8 @@ from .tools.bizrules import fetch_business_rules
 from .tools.watchlist import watchlist_search
 from .tools.notify import send_decision_email
 from .tools.runlog import persist_runlog
+from .router.router import llmrouter
+
 
 @CrewBase
 class KYCPipelineCrew:
@@ -13,14 +14,7 @@ class KYCPipelineCrew:
 
     agents_config = 'config/agents.yaml'
     tasks_config  = 'config/tasks.yaml'
-
-    # ---- Local LLM via Ollama (using llama3.2:1b) ----
-    def _local_llm(self) -> LLM:
-        return LLM(
-            model="ollama/llama3.2:1b",
-            base_url="http://localhost:11434",
-            temperature=0.2,
-    )
+    
 
     # ──────────────── Agents ────────────────
     @agent  #manager
@@ -29,16 +23,19 @@ class KYCPipelineCrew:
             config=self.agents_config['planner'], 
             verbose=True, 
             memory=False,
-            llm=self._local_llm(),
+            tools=[],
+            llm=llmrouter(),
         )
 
     @agent
     def extractor(self) -> Agent:
         return Agent(
             config=self.agents_config['extractor'],
-            tools=[ocr_extract, persist_runlog], 
+            tools=[ocr_extract, persist_runlog],
             verbose=True,
-            llm=self._local_llm(),
+            llm=llmrouter(),
+            max_iter=1,
+            allow_delegation=False   # <- prevents coworker ping-pong
         )
 
     @agent
@@ -47,7 +44,8 @@ class KYCPipelineCrew:
             config=self.agents_config['judge'], 
             tools=[persist_runlog], 
             verbose=True,
-             llm=self._local_llm(),
+            llm=llmrouter(),
+            max_iter=1,
         )
 
     @agent
@@ -56,16 +54,21 @@ class KYCPipelineCrew:
             config=self.agents_config['bizrules'], 
             tools=[fetch_business_rules, persist_runlog], 
             verbose=True,
-             llm=self._local_llm(),
+            llm=llmrouter(),
+            max_iter=1
         )
 
     @agent
     def risk(self) -> Agent:
         return Agent(
-            config=self.agents_config['risk'], 
-            tools=[watchlist_search, persist_runlog], 
+            tools=[watchlist_search, persist_runlog],
             verbose=True,
-            llm=self._local_llm(),
+            llm=llmrouter(),
+            role="Fraud-Risk Agent",
+            goal="Run watchlist screening and output a single risk decision.",
+            backstory="Grades risk based on watchlist matches; no coworker chatter.",
+            allow_delegation=False,
+            max_iter=1
         )
 
     @agent
@@ -74,7 +77,8 @@ class KYCPipelineCrew:
             config=self.agents_config['notifier'], 
             tools=[send_decision_email, persist_runlog], 
             verbose=True,
-            llm=self._local_llm(),
+            llm=llmrouter(),
+            max_iter=1
         )
 
     # ──────────────── Tasks ────────────────
@@ -82,7 +86,8 @@ class KYCPipelineCrew:
     def extract_task(self) -> Task:
         return Task(
             config=self.tasks_config['extract_task'], 
-            agent=self.extractor(), 
+            agent=self.extractor(),
+            verbose=True
         )
 
     @task

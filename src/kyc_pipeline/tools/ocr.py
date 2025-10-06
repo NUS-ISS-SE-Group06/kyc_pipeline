@@ -1,3 +1,5 @@
+# src/kyc_pipeline/tools/ocr.py
+import json, os
 from crewai.tools import tool
 import pytesseract
 from PIL import Image
@@ -27,8 +29,8 @@ def ocr_extract(s3_uri: str) -> str:
 
     return text
 
-if __name__ == "__main__":
-    path = "./test/idcard_john_doe.jpg"
-    raw_text = extract_text(path)
-    print("🔎 OCR Extracted Text:")
-    print(raw_text)
+# if __name__ == "__main__":
+#     path = "./test/idcard_john_doe.jpg"
+#     raw_text = extract_text(path)
+#     print("🔎 OCR Extracted Text:")
+#     print(raw_text)

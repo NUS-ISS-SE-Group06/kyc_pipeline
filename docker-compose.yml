@@ -1,0 +1,45 @@
+services:
+  kyc-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kycpipeline-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Change if your ASGI app path differs
+      APP_MODULE: "kyc_pipeline.api:app"
+      PORT: "8000"
+      # add your app env vars here (DB_URL, etc.)
+    volumes:
+      # Map your Mac folders into the container's working dir
+      - /Users/<user-profile>/kycpipeline/logs:/app/logs
+      - /Users/<user-profile>/kycpipeline/data:/app/data
+      - /Users/<user-profile>/kycpipeline/scripts:/app/scripts
+      # Optional: live-mount your source for dev inner-loop
+      # - .:/app
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    # default command already runs uvicorn (see Dockerfile CMD)
+
+  # Optional sidecar service for running crew tasks via CLI
+  crew:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kycpipeline-crew
+    working_dir: /app
+    depends_on:
+      - kyc-api
+    # Keeps the container around so you can exec into it and run `crewai run`
+    command: ["sleep", "infinity"]
+    volumes:
+      - /Users/<user-profile>/kycpipeline/logs:/app/logs
+      - /Users/<user-profile>/kycpipeline/data:/app/data
+      - /Users/<user-profile>/kycpipeline/scripts:/app/scripts
+      # Optional: live-mount source for iterating on crew configs
+      # - .:/app

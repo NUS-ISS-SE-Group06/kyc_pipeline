@@ -1,3 +1,74 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.dylib
+
+# Byte-compiled / optimized / DLL files
+*$py.class
+
+# Virtual envs
+.venv/
+venv/
+env/
+ENV/
+.python-version
+.conda/
+
+# Packaging / build
+build/
+dist/
+wheels/
+pip-wheel-metadata/
+*.egg-info/
+.eggs/
+*.egg
+.installed.cfg
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+.cache/
+nosetests.xml
+coverage.xml
+htmlcov/
+
+# Type checkers / linters
+.mypy_cache/
+.pytype/
+.pyrightcache/
+.ruff_cache/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Editors & IDEs
+.idea/
+*.iml
+.vscode/
+
+# OS files
 .DS_Store
 **__pycache__**
-.venv
+.env
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Env / secrets
+.env
+.env.*
+*.env
+
+# Tools (tox, nox)
+.tox/
+.nox/
+
+# Misc
+*.swp
+*.swo

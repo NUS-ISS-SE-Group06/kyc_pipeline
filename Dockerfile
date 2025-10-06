@@ -1,28 +1,39 @@
 FROM python:3.12-slim
 
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PYTHONPATH=/app/src
+    PIP_DISABLE_PIP_VERSION_CHECK=on \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=.venv \
+    PORT=8000
 
+#OS dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential gcc curl ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+    curl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 
-RUN useradd -m appuser
+# Install uv (single static binary)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
+
 WORKDIR /app
 
-COPY requirements.txt .
-RUN python -m pip install --upgrade pip && pip install -r requirements.txt
+COPY pyproject.toml ./
+COPY uv.lock ./uv.lock
 
-COPY src ./src
+#Create virtualenv and install deps
+RUN uv sync --all-extras --no-install-project
 
-RUN chown -R appuser:appuser /app
-USER appuser
+# Now copy the rest of your source
+COPY . .
 
-# This calls src/kyc_pipeline/main.py: if __name__ == "__main__": run()
-CMD ["python", "-m", "kyc_pipeline.main"]
+# Re-sync in case optional
+RUN uv sync --all-extras --no-install-project
 
+# Expose the uvicorn port
+EXPOSE 8000
 
-
-
+# Default command: run the API
+ENV APP_MODULE="kyc_pipeline.api:app"
+CMD ["uv", "run", "uvicorn", "kyc_pipeline.api:app", "--host", "0.0.0.0", "--port", "8000"]
