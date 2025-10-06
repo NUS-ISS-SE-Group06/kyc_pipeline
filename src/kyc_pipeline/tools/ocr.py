@@ -1,4 +1,3 @@
-# src/kyc_pipeline/tools/ocr.py
 import json, os
 from crewai.tools import tool
 import pytesseract

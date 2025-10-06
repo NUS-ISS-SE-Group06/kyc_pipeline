@@ -71,10 +71,10 @@ Next, go to `/script` directory
 
 #### Run LLM model
 
-Next, once ollama is up, you can Run any LLM model, here we are using `llama3.2:1b`
+Next, once ollama is up, you can Run any LLM model, here we are using `llama3.2:3b`
 
 ```bash
-    ollama run llama3.2:1b
+    ollama run llama3.2:3b
 ```
 
 Next, navigate to your project directory and install the dependencies:
@@ -155,6 +155,35 @@ curl http://localhost:8000/ping
 curl -X POST http://localhost:8000/run \
   -H "Content-Type: application/json" \
   -d '{"doc_id":"KYC-1","s3_uri":"s3://bucket/file.jpg","doc_type":"KYC","to_email":"user@example.com"}'
+
+# To get KYC Status
+1. Get all records:
+curl http://localhost:8000/kyc_status
+
+2. Filter by status:
+curl http://localhost:8000/kyc_status?final_decision=PROCESSED
+curl http://localhost:8000/kyc_status?final_decision=FAILED
+
+3. Search by customer name:
+curl http://localhost:8000/kyc_status?customer_name=Patel
+curl http://localhost:8000/kyc_status?customer_name=Sarah
+
+4. Filter by identification number:
+curl http://localhost:8000/kyc_status?identification_no=S1234567A
+
+5. Filter by date range:
+curl http://localhost:8000/kyc_status?from_date=2025-09-15&to_date=2025-09-15
+
+6. Combine multiple filters:
+curl http://localhost:8000/kyc_status?final_decision=PROCESSED&from_date=2025-09-15
+curl http://localhost:8000/kyc_status?customer_name=Lee&final_decision=INPROCESS
+
+7. Pagination:
+curl http://localhost:8000/kyc_status?limit=5&offset=0    # First 5 records
+curl http://localhost:8000/kyc_status?limit=5&offset=5    # Next 5 records
+
+8. Complex query:
+curl http://localhost:8000/kyc_status?final_decision=PROCESSED&from_date=2025-09-15&limit=10
 ```
 
 ## Docker

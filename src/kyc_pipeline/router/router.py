@@ -1,10 +1,15 @@
+import os
 from typing import Optional
 from crewai import LLM
 import requests
+from openai import OpenAI
 
-def _ping_ollama (base_url: str, timeout =2.0) -> bool:
+
+
+def _ping_ollama(base_url: str, timeout=2) -> bool:
+    """Ping Ollama server health endpoint."""
     try:
-        r = requests.get(f"{base_url}/api/tags",timeout=timeout)
+        r = requests.get(f"{base_url}/api/tags", timeout=timeout)
         if r.status_code == 200:
             return True
         else:
@@ -13,51 +18,43 @@ def _ping_ollama (base_url: str, timeout =2.0) -> bool:
         raise RuntimeError(f"Ping test failed: {e}")
 
 
-def llmrouter(model_name: Optional[str] = None, temperature: float = 0.05) -> LLM:
+def _ping_openai(model: str) -> bool:
+    """Ping OpenAI model with minimal request."""
+    try:
+        client = OpenAI()
+        resp = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": "ping"}],
+            max_tokens=1,
+            temperature=0,
+            )
+        return bool(resp and resp.choices)
+    except Exception as e:
+        raise RuntimeError(f"OpenAI Ping test failed: {e}")
+
+def llmrouter(model_name: str = "gpt-5-nano", temperature: float = 0.05) -> LLM:
     """
     Simple LLM Router:
-      - If model_name matches a known option, return that model.
-      - Otherwise default to llama3.2:3b.
-      - If any error occurs, fall back to llama3.2:1b.
+        - If model_name matches a known option, return that model.
+        - Otherwise default to gpt-4o-mini
+        - If any error occurs, fall back to gpt-4.1-mini"
     """
+    
+    fallback_model_name="gpt-4.1-mini"
     try:
-        if model_name and model_name.lower() == "llama3.1:8b":
-            # attempt to connect to http://localhost:11434/api/tags
-            url="http://localhost:11434"
-            _ping_ollama(url)
-            
-            return LLM(
-                model="llama3.1:8b",
-                base_url=url,
-                temperature=temperature,
-            )
-        elif model_name and model_name.lower() == "llama3.2:7b":
-            # attempt to connect to http://localhost:11434/api/tags
-            url="http://localhost:11434"
-            _ping_ollama(url)
-
-            return LLM(
-                model="llama3.2:7b",
-                base_url=url,
-                temperature=temperature,
-            )
-       
-        # Default LLM
-        else:
-            # attempt to connect to http://localhost:11434/api/tags
-            url="http://localhost:11434"
-            _ping_ollama(url)
-            
-            return LLM(
-                model="ollama/llama3.2-vision:11b",
-                base_url=url,
-                temperature=temperature,
-            )
+        # Default: Openai GPT
+        #gpt-4o-mini   1M Token, Input $ 0.15 Output $0.6
+        #gpt-4.1-mini  1M Token, Input $ 0.4 Output $1.6
+        #gpt-5-nano    1M Token, Input $ 0.05 Output $0.4
+        _ping_openai(model_name)
+        return LLM(
+            model=model_name,
+            temperature=temperature,
+        )
         
     # Fallback
     except Exception:
         return LLM(
-            model="ollama/llama3.2-vision:12b",
-            base_url="http://localhost:11434",
+            model=fallback_model_name,
             temperature=temperature,
         )

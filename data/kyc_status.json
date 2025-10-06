@@ -7,7 +7,11 @@
     "email_id": "aarav.patel@example.com",
     "final_decision": "PROCESSED",
     "created_at": "2025-09-15T20:30:00+08:00",
-    "modified_at": "2025-09-15T20:34:00+08:00"
+    "modified_at": "2025-09-15T20:34:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 2,
@@ -17,7 +21,11 @@
     "email_id": "priya.nair@example.com",
     "final_decision": "INPROCESS",
     "created_at": "2025-09-15T20:32:00+08:00",
-    "modified_at": "2025-09-15T20:32:00+08:00"
+    "modified_at": "2025-09-15T20:32:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 3,
@@ -27,7 +35,11 @@
     "email_id": "weijie.tan@example.com",
     "final_decision": "FAILED",
     "created_at": "2025-09-15T20:34:00+08:00",
-    "modified_at": "2025-09-15T20:40:00+08:00"
+    "modified_at": "2025-09-15T20:40:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 4,
@@ -37,7 +49,11 @@
     "email_id": "nur.aisyah@example.com",
     "final_decision": "PROCESSED",
     "created_at": "2025-09-15T20:36:00+08:00",
-    "modified_at": "2025-09-15T20:40:00+08:00"
+    "modified_at": "2025-09-15T20:40:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 5,
@@ -47,7 +63,11 @@
     "email_id": "harish.kumar@example.com",
     "final_decision": "INPROCESS",
     "created_at": "2025-09-15T20:38:00+08:00",
-    "modified_at": "2025-09-15T20:38:00+08:00"
+    "modified_at": "2025-09-15T20:38:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 6,
@@ -57,7 +77,11 @@
     "email_id": "liwei.chen@example.com",
     "final_decision": "PROCESSED",
     "created_at": "2025-09-15T20:40:00+08:00",
-    "modified_at": "2025-09-15T20:44:00+08:00"
+    "modified_at": "2025-09-15T20:44:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 7,
@@ -67,7 +91,11 @@
     "email_id": "siti.rahmah@example.com",
     "final_decision": "FAILED",
     "created_at": "2025-09-15T20:42:00+08:00",
-    "modified_at": "2025-09-15T20:48:00+08:00"
+    "modified_at": "2025-09-15T20:48:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 8,
@@ -77,7 +105,11 @@
     "email_id": "karthik.subramanian@example.com",
     "final_decision": "INPROCESS",
     "created_at": "2025-09-15T20:44:00+08:00",
-    "modified_at": "2025-09-15T20:44:00+08:00"
+    "modified_at": "2025-09-15T20:44:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 9,
@@ -87,7 +119,11 @@
     "email_id": "ananya.gupta@example.com",
     "final_decision": "PROCESSED",
     "created_at": "2025-09-15T20:46:00+08:00",
-    "modified_at": "2025-09-15T20:50:00+08:00"
+    "modified_at": "2025-09-15T20:50:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 10,
@@ -97,7 +133,11 @@
     "email_id": "daniel.lim@example.com",
     "final_decision": "FAILED",
     "created_at": "2025-09-15T20:48:00+08:00",
-    "modified_at": "2025-09-15T20:54:00+08:00"
+    "modified_at": "2025-09-15T20:54:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 11,
@@ -107,7 +147,11 @@
     "email_id": "farah.ahmad@example.com",
     "final_decision": "INPROCESS",
     "created_at": "2025-09-15T20:50:00+08:00",
-    "modified_at": "2025-09-15T20:50:00+08:00"
+    "modified_at": "2025-09-15T20:50:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 12,
@@ -117,7 +161,11 @@
     "email_id": "jason.ong@example.com",
     "final_decision": "PROCESSED",
     "created_at": "2025-09-15T20:52:00+08:00",
-    "modified_at": "2025-09-15T20:56:00+08:00"
+    "modified_at": "2025-09-15T20:56:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 13,
@@ -127,7 +175,11 @@
     "email_id": "kavya.iyer@example.com",
     "final_decision": "PROCESSED",
     "created_at": "2025-09-15T20:54:00+08:00",
-    "modified_at": "2025-09-15T20:58:00+08:00"
+    "modified_at": "2025-09-15T20:58:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 14,
@@ -137,7 +189,11 @@
     "email_id": "muhammad.hafiz@example.com",
     "final_decision": "FAILED",
     "created_at": "2025-09-15T20:56:00+08:00",
-    "modified_at": "2025-09-15T21:02:00+08:00"
+    "modified_at": "2025-09-15T21:02:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 15,
@@ -147,7 +203,11 @@
     "email_id": "sarah.lee@example.com",
     "final_decision": "INPROCESS",
     "created_at": "2025-09-15T20:58:00+08:00",
-    "modified_at": "2025-09-15T20:58:00+08:00"
+    "modified_at": "2025-09-15T20:58:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 16,
@@ -157,7 +217,11 @@
     "email_id": "vivek.menon@example.com",
     "final_decision": "PROCESSED",
     "created_at": "2025-09-15T21:00:00+08:00",
-    "modified_at": "2025-09-15T21:04:00+08:00"
+    "modified_at": "2025-09-15T21:04:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 17,
@@ -167,7 +231,11 @@
     "email_id": "chloe.ng@example.com",
     "final_decision": "FAILED",
     "created_at": "2025-09-15T21:02:00+08:00",
-    "modified_at": "2025-09-15T21:08:00+08:00"
+    "modified_at": "2025-09-15T21:08:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 18,
@@ -177,7 +245,11 @@
     "email_id": "rajesh.pillai@example.com",
     "final_decision": "INPROCESS",
     "created_at": "2025-09-15T21:04:00+08:00",
-    "modified_at": "2025-09-15T21:04:00+08:00"
+    "modified_at": "2025-09-15T21:04:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 19,
@@ -187,7 +259,11 @@
     "email_id": "jingyi.wong@example.com",
     "final_decision": "PROCESSED",
     "created_at": "2025-09-15T21:06:00+08:00",
-    "modified_at": "2025-09-15T21:10:00+08:00"
+    "modified_at": "2025-09-15T21:10:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   },
   {
     "id": 20,
@@ -197,6 +273,10 @@
     "email_id": "naveen.das@example.com",
     "final_decision": "FAILED",
     "created_at": "2025-09-15T21:08:00+08:00",
-    "modified_at": "2025-09-15T21:14:00+08:00"
+    "modified_at": "2025-09-15T21:14:00+08:00",
+    "audit_log": [
+      "2012-05-01 00:00:00 sample audit log description 1",
+      "2012-05-01 00:00:00 sample audit log description 12"
+    ]
   }
 ]
