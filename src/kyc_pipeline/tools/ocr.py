@@ -1,48 +1,82 @@
 import json, os
 from crewai.tools import tool
-from pathlib import Path
+import pytesseract
+import re  
+from PIL import Image
+import cv2
+import magic
 
-_STUBS = {
-    # filename → normalized fields you want your Extract step to use
-    "idcard_john_doe.jpg": {
-        "name": "JOHN DOE",
-        "dob": "1990-01-01",
-        "address": "123 Example St, #01-01, Singapore 123456",
-        "id_number": "S1234567A",
-        "has_face_photo": True,
-        "confidence": 0.95,
-        "coverage_notes": "Stubbed OCR output"
-    },
-    # add more test files here if needed
-}
+ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/tiff", "application/pdf"]
+MAX_FILE_SIZE_MB = 10  # Limit file size
 
-def _stub_payload_for(uri: str):
-    fname = Path(uri).name
-    return _STUBS.get(fname, {
-        # fall-back stub (useful even when filename doesn’t match)
-        "name": "ADA LOVELACE",
-        "dob": "1815-12-10",
-        "address": "10 Bayes Rd, London",
-        "id_number": "SG1234567",
-        "has_face_photo": True,
-        "confidence": 0.9,
-        "coverage_notes": "Global fallback stub"
-    })
 
-def ocr_extract_pure(s3_uri: str) -> str:
+@tool("ocr_extract")
+def ocr_extract(s3_uri: str) -> str:
     """
-    Return OCR result as a JSON string with normalized keys.
-    In stub mode (OCR_MODE=stub), return canned data based on file name.
+    Extract text from an image or PDF using Tesseract OCR,
+    after validating file safety and content integrity.
     """
-    mode = os.getenv("OCR_MODE", "real").lower()
+    image_path = s3_uri
 
-    if mode == "stub":
-        payload = _stub_payload_for(s3_uri)
-        return json.dumps({"extracted": payload})  # JSON STRING
+    # 1️⃣ Validate file exists and size
+    if not os.path.exists(image_path):
+        raise FileNotFoundError(f"❌ File not found: {image_path}")
 
-    # --- real mode (placeholder) ---
-    # text = run_real_ocr(s3_uri)
-    # parsed = parse_text_to_fields(text)
-    # return json.dumps({"extracted": parsed})
-    return json.dumps({"extracted": _stub_payload_for(s3_uri)})  # temporary until real OCR wired
-ocr_extract = tool("ocr_extract")(ocr_extract_pure)
+    file_size_mb = os.path.getsize(image_path) / (1024 * 1024)
+    if file_size_mb > MAX_FILE_SIZE_MB:
+        raise ValueError(f"❌ File too large ({file_size_mb:.2f} MB). Limit is {MAX_FILE_SIZE_MB} MB.")
+
+    # 2️⃣ Validate MIME type
+    mime = magic.Magic(mime=True)
+    mime_type = mime.from_file(image_path)
+    if mime_type not in ALLOWED_MIME_TYPES:
+        raise ValueError(f"❌ Unsupported file type: {mime_type}")
+
+    # 3️⃣ Load image
+    image = cv2.imread(image_path)
+    if image is None:
+        raise ValueError("❌ Unable to read image (possibly corrupted).")
+
+    # 4️⃣ Preprocess
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
+    temp_filename = "temp.png"
+    cv2.imwrite(temp_filename, gray)
+
+    # 5️⃣ Run OCR
+    text = pytesseract.image_to_string(Image.open(temp_filename))
+
+    # 6️⃣ Validate OCR text safety
+    safe_text = validate_ocr_text_safety(text)
+
+    print("✅ File validated, sanitized, and OCR completed successfully.")
+    return safe_text
+
+# 🔒 Separate malicious content validator
+def validate_ocr_text_safety(text: str) -> None:
+    """
+    Validate OCR-extracted text for malicious or unsafe content.
+    Raises ValueError if unsafe patterns are detected.
+    """
+    # Suspicious patterns that may indicate prompt injection or malicious commands
+    suspicious_patterns = [
+        r"<script.*?>", r"</script>",                # HTML/JS injection
+        r"(?i)system\(", r"(?i)os\.system",          # Python/system exec
+        r"(?i)subprocess", r"(?i)eval\(",            # Code execution
+        r"(?i)bash", r"(?i)cmd\.exe",                # Shell commands
+        r"(?i)rm\s+-rf", r"(?i)del\s+",              # File deletion
+        r"(?i)curl\s+http", r"(?i)wget\s+http",      # Remote fetch
+        r"(?i)base64\s+decode",                      # Encoded payloads
+        r"(?i)import\s+os", r"(?i)import\s+sys"      # Python injections
+    ]
+
+    for pattern in suspicious_patterns:
+        if re.search(pattern, text):
+            raise ValueError(f"⚠️ Malicious content detected: pattern '{pattern}'")
+
+    # Clean up control or invisible characters
+    sanitized = re.sub(r"[\x00-\x1F\x7F]", "", text)
+    sanitized = re.sub(r"[ \t]+", " ", text)
+    sanitized = sanitized.strip()
+    return sanitized
+
