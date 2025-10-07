@@ -9,13 +9,16 @@
     "created_at": "2025-09-15T20:30:00+08:00",
     "modified_at": "2025-09-15T20:34:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 08:45:00 Document OCR by DocumentAgent – fields extracted successfully",
+      "2025-09-15 08:50:15 Validation check by BizRuleAgent – format and ID rules passed",
+      "2025-09-15 08:55:30 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
+      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent – no hits detected",
+      "2025-09-15 09:05:10 DecisionAgent concluded processing – status PROCESSED"
     ]
   },
   {
     "id": 2,
-    "File_Name": "KYC_20250915_0002.jpg",
+    "File_Name": "KYC_20250915_0002.pdf",
     "customer_name": "Priya Nair",
     "identification_no": "T7654321B",
     "email_id": "priya.nair@example.com",
@@ -23,13 +26,16 @@
     "created_at": "2025-09-15T20:32:00+08:00",
     "modified_at": "2025-09-15T20:32:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 09:10:00 Document OCR by DocumentAgent – partial/clean extraction",
+      "2025-09-15 09:15:20 Validation check by BizRuleAgent – one or more fields require confirmation",
+      "2025-09-15 09:20:40 Verifying document by JudgmentAgent – queued for manual review",
+      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent – screening in progress",
+      "2025-09-15 09:30:30 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
     ]
   },
   {
     "id": 3,
-    "File_Name": "KYC_20250915_0003.png",
+    "File_Name": "KYC_20250915_0003.pdf",
     "customer_name": "Wei Jie Tan",
     "identification_no": "F2345678C",
     "email_id": "weijie.tan@example.com",
@@ -37,8 +43,11 @@
     "created_at": "2025-09-15T20:34:00+08:00",
     "modified_at": "2025-09-15T20:40:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 10:00:00 Document OCR by DocumentAgent – low quality/partial capture",
+      "2025-09-15 10:04:20 Validation check by BizRuleAgent – critical rule violation detected",
+      "2025-09-15 10:08:40 Verifying document by JudgmentAgent – mismatch could not be resolved",
+      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
+      "2025-09-15 10:15:30 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
     ]
   },
   {
@@ -51,13 +60,16 @@
     "created_at": "2025-09-15T20:36:00+08:00",
     "modified_at": "2025-09-15T20:40:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 11:00:00 Document OCR by DocumentAgent – fields extracted successfully",
+      "2025-09-15 11:05:20 Validation check by BizRuleAgent – format and ID rules passed",
+      "2025-09-15 11:10:40 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
+      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent – no hits detected",
+      "2025-09-15 11:18:30 DecisionAgent concluded processing – status PROCESSED"
     ]
   },
   {
     "id": 5,
-    "File_Name": "KYC_20250915_0005.jpg",
+    "File_Name": "KYC_20250915_0005.pdf",
     "customer_name": "Harish Kumar",
     "identification_no": "S1122334E",
     "email_id": "harish.kumar@example.com",
@@ -65,13 +77,16 @@
     "created_at": "2025-09-15T20:38:00+08:00",
     "modified_at": "2025-09-15T20:38:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 13:45:00 Document OCR by DocumentAgent – partial/clean extraction",
+      "2025-09-15 13:50:15 Validation check by BizRuleAgent – one or more fields require confirmation",
+      "2025-09-15 13:55:30 Verifying document by JudgmentAgent – queued for manual review",
+      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent – screening in progress",
+      "2025-09-15 14:05:10 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
     ]
   },
   {
     "id": 6,
-    "File_Name": "KYC_20250915_0006.png",
+    "File_Name": "KYC_20250915_0006.pdf",
     "customer_name": "Li Wei Chen",
     "identification_no": "T9988776F",
     "email_id": "liwei.chen@example.com",
@@ -79,8 +94,11 @@
     "created_at": "2025-09-15T20:40:00+08:00",
     "modified_at": "2025-09-15T20:44:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 08:45:00 Document OCR by DocumentAgent – fields extracted successfully",
+      "2025-09-15 08:50:15 Validation check by BizRuleAgent – format and ID rules passed",
+      "2025-09-15 08:55:30 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
+      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent – no hits detected",
+      "2025-09-15 09:05:10 DecisionAgent concluded processing – status PROCESSED"
     ]
   },
   {
@@ -93,13 +111,16 @@
     "created_at": "2025-09-15T20:42:00+08:00",
     "modified_at": "2025-09-15T20:48:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 09:10:00 Document OCR by DocumentAgent – low quality/partial capture",
+      "2025-09-15 09:15:20 Validation check by BizRuleAgent – critical rule violation detected",
+      "2025-09-15 09:20:40 Verifying document by JudgmentAgent – mismatch could not be resolved",
+      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
+      "2025-09-15 09:30:30 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
     ]
   },
   {
     "id": 8,
-    "File_Name": "KYC_20250915_0008.jpg",
+    "File_Name": "KYC_20250915_0008.pdf",
     "customer_name": "Karthik Subramanian",
     "identification_no": "G4433221H",
     "email_id": "karthik.subramanian@example.com",
@@ -107,13 +128,16 @@
     "created_at": "2025-09-15T20:44:00+08:00",
     "modified_at": "2025-09-15T20:44:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 10:00:00 Document OCR by DocumentAgent – partial/clean extraction",
+      "2025-09-15 10:04:20 Validation check by BizRuleAgent – one or more fields require confirmation",
+      "2025-09-15 10:08:40 Verifying document by JudgmentAgent – queued for manual review",
+      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent – screening in progress",
+      "2025-09-15 10:15:30 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
     ]
   },
   {
     "id": 9,
-    "File_Name": "KYC_20250915_0009.png",
+    "File_Name": "KYC_20250915_0009.pdf",
     "customer_name": "Ananya Gupta",
     "identification_no": "S6677889J",
     "email_id": "ananya.gupta@example.com",
@@ -121,8 +145,11 @@
     "created_at": "2025-09-15T20:46:00+08:00",
     "modified_at": "2025-09-15T20:50:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 11:00:00 Document OCR by DocumentAgent – fields extracted successfully",
+      "2025-09-15 11:05:20 Validation check by BizRuleAgent – format and ID rules passed",
+      "2025-09-15 11:10:40 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
+      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent – no hits detected",
+      "2025-09-15 11:18:30 DecisionAgent concluded processing – status PROCESSED"
     ]
   },
   {
@@ -135,13 +162,16 @@
     "created_at": "2025-09-15T20:48:00+08:00",
     "modified_at": "2025-09-15T20:54:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 13:45:00 Document OCR by DocumentAgent – low quality/partial capture",
+      "2025-09-15 13:50:15 Validation check by BizRuleAgent – critical rule violation detected",
+      "2025-09-15 13:55:30 Verifying document by JudgmentAgent – mismatch could not be resolved",
+      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
+      "2025-09-15 14:05:10 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
     ]
   },
   {
     "id": 11,
-    "File_Name": "KYC_20250915_0011.jpg",
+    "File_Name": "KYC_20250915_0011.pdf",
     "customer_name": "Farah Ahmad",
     "identification_no": "F7788990L",
     "email_id": "farah.ahmad@example.com",
@@ -149,13 +179,16 @@
     "created_at": "2025-09-15T20:50:00+08:00",
     "modified_at": "2025-09-15T20:50:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 08:45:00 Document OCR by DocumentAgent – partial/clean extraction",
+      "2025-09-15 08:50:15 Validation check by BizRuleAgent – one or more fields require confirmation",
+      "2025-09-15 08:55:30 Verifying document by JudgmentAgent – queued for manual review",
+      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent – screening in progress",
+      "2025-09-15 09:05:10 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
     ]
   },
   {
     "id": 12,
-    "File_Name": "KYC_20250915_0012.png",
+    "File_Name": "KYC_20250915_0012.pdf",
     "customer_name": "Jason Ong",
     "identification_no": "G2211443M",
     "email_id": "jason.ong@example.com",
@@ -163,8 +196,11 @@
     "created_at": "2025-09-15T20:52:00+08:00",
     "modified_at": "2025-09-15T20:56:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 09:10:00 Document OCR by DocumentAgent – fields extracted successfully",
+      "2025-09-15 09:15:20 Validation check by BizRuleAgent – format and ID rules passed",
+      "2025-09-15 09:20:40 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
+      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent – no hits detected",
+      "2025-09-15 09:30:30 DecisionAgent concluded processing – status PROCESSED"
     ]
   },
   {
@@ -177,13 +213,16 @@
     "created_at": "2025-09-15T20:54:00+08:00",
     "modified_at": "2025-09-15T20:58:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 10:00:00 Document OCR by DocumentAgent – fields extracted successfully",
+      "2025-09-15 10:04:20 Validation check by BizRuleAgent – format and ID rules passed",
+      "2025-09-15 10:08:40 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
+      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent – no hits detected",
+      "2025-09-15 10:15:30 DecisionAgent concluded processing – status PROCESSED"
     ]
   },
   {
     "id": 14,
-    "File_Name": "KYC_20250915_0014.jpg",
+    "File_Name": "KYC_20250915_0014.pdf",
     "customer_name": "Muhammad Hafiz",
     "identification_no": "T1212123P",
     "email_id": "muhammad.hafiz@example.com",
@@ -191,13 +230,16 @@
     "created_at": "2025-09-15T20:56:00+08:00",
     "modified_at": "2025-09-15T21:02:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 11:00:00 Document OCR by DocumentAgent – low quality/partial capture",
+      "2025-09-15 11:05:20 Validation check by BizRuleAgent – critical rule violation detected",
+      "2025-09-15 11:10:40 Verifying document by JudgmentAgent – mismatch could not be resolved",
+      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
+      "2025-09-15 11:18:30 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
     ]
   },
   {
     "id": 15,
-    "File_Name": "KYC_20250915_0015.png",
+    "File_Name": "KYC_20250915_0015.pdf",
     "customer_name": "Sarah Lee",
     "identification_no": "F3434345Q",
     "email_id": "sarah.lee@example.com",
@@ -205,8 +247,11 @@
     "created_at": "2025-09-15T20:58:00+08:00",
     "modified_at": "2025-09-15T20:58:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 13:45:00 Document OCR by DocumentAgent – partial/clean extraction",
+      "2025-09-15 13:50:15 Validation check by BizRuleAgent – one or more fields require confirmation",
+      "2025-09-15 13:55:30 Verifying document by JudgmentAgent – queued for manual review",
+      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent – screening in progress",
+      "2025-09-15 14:05:10 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
     ]
   },
   {
@@ -219,13 +264,16 @@
     "created_at": "2025-09-15T21:00:00+08:00",
     "modified_at": "2025-09-15T21:04:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 08:45:00 Document OCR by DocumentAgent – fields extracted successfully",
+      "2025-09-15 08:50:15 Validation check by BizRuleAgent – format and ID rules passed",
+      "2025-09-15 08:55:30 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
+      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent – no hits detected",
+      "2025-09-15 09:05:10 DecisionAgent concluded processing – status PROCESSED"
     ]
   },
   {
     "id": 17,
-    "File_Name": "KYC_20250915_0017.jpg",
+    "File_Name": "KYC_20250915_0017.pdf",
     "customer_name": "Chloe Ng",
     "identification_no": "S7878789S",
     "email_id": "chloe.ng@example.com",
@@ -233,13 +281,16 @@
     "created_at": "2025-09-15T21:02:00+08:00",
     "modified_at": "2025-09-15T21:08:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 09:10:00 Document OCR by DocumentAgent – low quality/partial capture",
+      "2025-09-15 09:15:20 Validation check by BizRuleAgent – critical rule violation detected",
+      "2025-09-15 09:20:40 Verifying document by JudgmentAgent – mismatch could not be resolved",
+      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
+      "2025-09-15 09:30:30 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
     ]
   },
   {
     "id": 18,
-    "File_Name": "KYC_20250915_0018.png",
+    "File_Name": "KYC_20250915_0018.pdf",
     "customer_name": "Rajesh Pillai",
     "identification_no": "T9091923T",
     "email_id": "rajesh.pillai@example.com",
@@ -247,8 +298,11 @@
     "created_at": "2025-09-15T21:04:00+08:00",
     "modified_at": "2025-09-15T21:04:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 10:00:00 Document OCR by DocumentAgent – partial/clean extraction",
+      "2025-09-15 10:04:20 Validation check by BizRuleAgent – one or more fields require confirmation",
+      "2025-09-15 10:08:40 Verifying document by JudgmentAgent – queued for manual review",
+      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent – screening in progress",
+      "2025-09-15 10:15:30 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
     ]
   },
   {
@@ -261,13 +315,16 @@
     "created_at": "2025-09-15T21:06:00+08:00",
     "modified_at": "2025-09-15T21:10:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 11:00:00 Document OCR by DocumentAgent – fields extracted successfully",
+      "2025-09-15 11:05:20 Validation check by BizRuleAgent – format and ID rules passed",
+      "2025-09-15 11:10:40 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
+      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent – no hits detected",
+      "2025-09-15 11:18:30 DecisionAgent concluded processing – status PROCESSED"
     ]
   },
   {
     "id": 20,
-    "File_Name": "KYC_20250915_0020.jpg",
+    "File_Name": "KYC_20250915_0020.pdf",
     "customer_name": "Naveen Das",
     "identification_no": "G1314151V",
     "email_id": "naveen.das@example.com",
@@ -275,8 +332,11 @@
     "created_at": "2025-09-15T21:08:00+08:00",
     "modified_at": "2025-09-15T21:14:00+08:00",
     "audit_log": [
-      "2012-05-01 00:00:00 sample audit log description 1",
-      "2012-05-01 00:00:00 sample audit log description 12"
+      "2025-09-15 13:45:00 Document OCR by DocumentAgent – low quality/partial capture",
+      "2025-09-15 13:50:15 Validation check by BizRuleAgent – critical rule violation detected",
+      "2025-09-15 13:55:30 Verifying document by JudgmentAgent – mismatch could not be resolved",
+      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
+      "2025-09-15 14:05:10 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
     ]
   }
 ]
