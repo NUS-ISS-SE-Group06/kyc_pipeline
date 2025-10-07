@@ -23,6 +23,12 @@ RUN uv sync --all-extras --no-dev
 # Stage 2: Runtime (smaller final image)
 FROM python:3.12-slim
 
+# ✅ Install Tesseract (with English data)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+ && rm -rf /var/lib/apt/lists/*
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=8000
