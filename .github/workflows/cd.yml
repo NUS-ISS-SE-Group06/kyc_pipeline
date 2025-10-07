@@ -1,0 +1,104 @@
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      AWS_REGION: ap-southeast-1
+      ECR_REPO: kyc-app                     # <-- ECR repository name
+      CLUSTER: kyc-app-cluster              # <-- ECS cluster name
+      SERVICE: kyc-app-svc                  # <-- ECS service name
+      TASK_FAMILY: kyc-app-task             # <-- ECS task definition family
+      CONTAINER_NAME: app                   # <-- the container name inside task def
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (IAM user keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create .env from template and inject secret
+        run: |
+          cp .env.example .env
+          if grep -q '^OPENAI_API_KEY=' .env; then
+            sed -i "s|^OPENAI_API_KEY=.*|OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}|" .env
+          else
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+          fi
+
+      - name: Build & push image (ARM64; SHA and latest)
+        run: |
+          REGISTRY="${{ steps.ecr.outputs.registry }}"
+          IMAGE_SHA_TAG="$REGISTRY/${ECR_REPO}:${{ github.sha }}"
+          IMAGE_LATEST_TAG="$REGISTRY/${ECR_REPO}:latest"
+
+          docker buildx build \
+            --platform linux/arm64 \
+            -t "$IMAGE_SHA_TAG" \
+            -t "$IMAGE_LATEST_TAG" \
+            --push .
+          echo "IMAGE_URI=$IMAGE_SHA_TAG" >> $GITHUB_ENV
+
+      - name: Remove local .env after build
+        if: always()
+        run: rm -f .env
+
+      - name: Fetch current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$TASK_FAMILY" \
+            --query 'taskDefinition' > base.json
+
+      - name: Render new task definition with new image
+        run: |
+          jq --arg IMG "$IMAGE_URI" --arg NAME "$CONTAINER_NAME" '
+            .containerDefinitions = (.containerDefinitions | map(
+              if .name == $NAME then .image = $IMG | . else . end
+            ))
+            | {family, networkMode, requiresCompatibilities, cpu, memory,
+               executionRoleArn, taskRoleArn, runtimePlatform, containerDefinitions}
+          ' base.json > new-taskdef.json
+
+      - name: Register new task definition
+        id: register
+        run: |
+          TD_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://new-taskdef.json \
+            --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "TD_ARN=$TD_ARN" >> $GITHUB_ENV
+
+      - name: Update ECS service (rolling deploy)
+        run: |
+          aws ecs update-service \
+            --cluster "$CLUSTER" \
+            --service "$SERVICE" \
+            --task-definition "$TD_ARN" \
+            --force-new-deployment
+
+      - name: Wait for service to stabilize
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER" \
+            --services "$SERVICE" \
+            --region "${{ env.AWS_REGION }}"

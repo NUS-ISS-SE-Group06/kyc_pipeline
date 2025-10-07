@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM python:3.12-slim as builder
+FROM python:3.12-slim AS builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -42,6 +42,9 @@ COPY --from=builder /build/pyproject.toml /build/uv.lock ./
 COPY --from=builder /build/src ./src
 COPY data/ /app/data/
 COPY test/ /app/test/
+
+# create the runtime .env (defaults only; NO secrets baked)
+COPY .env.example /app/.env
 
 # Clean up
 RUN find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
