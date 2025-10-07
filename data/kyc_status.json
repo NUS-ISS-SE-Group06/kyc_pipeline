@@ -9,11 +9,11 @@
     "created_at": "2025-09-15T20:30:00+08:00",
     "modified_at": "2025-09-15T20:34:00+08:00",
     "audit_log": [
-      "2025-09-15 08:45:00 Document OCR by DocumentAgent – fields extracted successfully",
-      "2025-09-15 08:50:15 Validation check by BizRuleAgent – format and ID rules passed",
-      "2025-09-15 08:55:30 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
-      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent – no hits detected",
-      "2025-09-15 09:05:10 DecisionAgent concluded processing – status PROCESSED"
+      "2025-09-15 08:45:00 Document OCR by DocumentAgent,fields extracted successfully",
+      "2025-09-15 08:50:15 Validation check by BizRuleAgent,format and ID rules passed",
+      "2025-09-15 08:55:30 Verifying document by JudgmentAgent,selfie match and consistency confirmed",
+      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent,no hits detected",
+      "2025-09-15 09:05:10 DecisionAgent concluded processing,status PROCESSED"
     ]
   },
   {
@@ -26,11 +26,11 @@
     "created_at": "2025-09-15T20:32:00+08:00",
     "modified_at": "2025-09-15T20:32:00+08:00",
     "audit_log": [
-      "2025-09-15 09:10:00 Document OCR by DocumentAgent – partial/clean extraction",
-      "2025-09-15 09:15:20 Validation check by BizRuleAgent – one or more fields require confirmation",
-      "2025-09-15 09:20:40 Verifying document by JudgmentAgent – queued for manual review",
-      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent – screening in progress",
-      "2025-09-15 09:30:30 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
+      "2025-09-15 09:10:00 Document OCR by DocumentAgent,partial/clean extraction",
+      "2025-09-15 09:15:20 Validation check by BizRuleAgent,one or more fields require confirmation",
+      "2025-09-15 09:20:40 Verifying document by JudgmentAgent,queued for manual review",
+      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent,screening in progress",
+      "2025-09-15 09:30:30 DecisionAgent concluded processing,status INPROCESS,awaiting additional evidence/verification"
     ]
   },
   {
@@ -43,11 +43,11 @@
     "created_at": "2025-09-15T20:34:00+08:00",
     "modified_at": "2025-09-15T20:40:00+08:00",
     "audit_log": [
-      "2025-09-15 10:00:00 Document OCR by DocumentAgent – low quality/partial capture",
-      "2025-09-15 10:04:20 Validation check by BizRuleAgent – critical rule violation detected",
-      "2025-09-15 10:08:40 Verifying document by JudgmentAgent – mismatch could not be resolved",
-      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
-      "2025-09-15 10:15:30 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
+      "2025-09-15 10:00:00 Document OCR by DocumentAgent,low quality/partial capture",
+      "2025-09-15 10:04:20 Validation check by BizRuleAgent,critical rule violation detected",
+      "2025-09-15 10:08:40 Verifying document by JudgmentAgent,mismatch could not be resolved",
+      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent,step skipped due to validation failure",
+      "2025-09-15 10:15:30 DecisionAgent concluded processing,marked FAILED,insufficient or inconsistent documentation"
     ]
   },
   {
@@ -60,11 +60,11 @@
     "created_at": "2025-09-15T20:36:00+08:00",
     "modified_at": "2025-09-15T20:40:00+08:00",
     "audit_log": [
-      "2025-09-15 11:00:00 Document OCR by DocumentAgent – fields extracted successfully",
-      "2025-09-15 11:05:20 Validation check by BizRuleAgent – format and ID rules passed",
-      "2025-09-15 11:10:40 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
-      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent – no hits detected",
-      "2025-09-15 11:18:30 DecisionAgent concluded processing – status PROCESSED"
+      "2025-09-15 11:00:00 Document OCR by DocumentAgent,fields extracted successfully",
+      "2025-09-15 11:05:20 Validation check by BizRuleAgent,format and ID rules passed",
+      "2025-09-15 11:10:40 Verifying document by JudgmentAgent,selfie match and consistency confirmed",
+      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent,no hits detected",
+      "2025-09-15 11:18:30 DecisionAgent concluded processing,status PROCESSED"
     ]
   },
   {
@@ -77,11 +77,11 @@
     "created_at": "2025-09-15T20:38:00+08:00",
     "modified_at": "2025-09-15T20:38:00+08:00",
     "audit_log": [
-      "2025-09-15 13:45:00 Document OCR by DocumentAgent – partial/clean extraction",
-      "2025-09-15 13:50:15 Validation check by BizRuleAgent – one or more fields require confirmation",
-      "2025-09-15 13:55:30 Verifying document by JudgmentAgent – queued for manual review",
-      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent – screening in progress",
-      "2025-09-15 14:05:10 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
+      "2025-09-15 13:45:00 Document OCR by DocumentAgent,partial/clean extraction",
+      "2025-09-15 13:50:15 Validation check by BizRuleAgent,one or more fields require confirmation",
+      "2025-09-15 13:55:30 Verifying document by JudgmentAgent,queued for manual review",
+      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent,screening in progress",
+      "2025-09-15 14:05:10 DecisionAgent concluded processing,status INPROCESS,awaiting additional evidence/verification"
     ]
   },
   {
@@ -94,11 +94,11 @@
     "created_at": "2025-09-15T20:40:00+08:00",
     "modified_at": "2025-09-15T20:44:00+08:00",
     "audit_log": [
-      "2025-09-15 08:45:00 Document OCR by DocumentAgent – fields extracted successfully",
-      "2025-09-15 08:50:15 Validation check by BizRuleAgent – format and ID rules passed",
-      "2025-09-15 08:55:30 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
-      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent – no hits detected",
-      "2025-09-15 09:05:10 DecisionAgent concluded processing – status PROCESSED"
+      "2025-09-15 08:45:00 Document OCR by DocumentAgent,fields extracted successfully",
+      "2025-09-15 08:50:15 Validation check by BizRuleAgent,format and ID rules passed",
+      "2025-09-15 08:55:30 Verifying document by JudgmentAgent,selfie match and consistency confirmed",
+      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent,no hits detected",
+      "2025-09-15 09:05:10 DecisionAgent concluded processing,status PROCESSED"
     ]
   },
   {
@@ -111,11 +111,11 @@
     "created_at": "2025-09-15T20:42:00+08:00",
     "modified_at": "2025-09-15T20:48:00+08:00",
     "audit_log": [
-      "2025-09-15 09:10:00 Document OCR by DocumentAgent – low quality/partial capture",
-      "2025-09-15 09:15:20 Validation check by BizRuleAgent – critical rule violation detected",
-      "2025-09-15 09:20:40 Verifying document by JudgmentAgent – mismatch could not be resolved",
-      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
-      "2025-09-15 09:30:30 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
+      "2025-09-15 09:10:00 Document OCR by DocumentAgent,low quality/partial capture",
+      "2025-09-15 09:15:20 Validation check by BizRuleAgent,critical rule violation detected",
+      "2025-09-15 09:20:40 Verifying document by JudgmentAgent,mismatch could not be resolved",
+      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent,step skipped due to validation failure",
+      "2025-09-15 09:30:30 DecisionAgent concluded processing,marked FAILED,insufficient or inconsistent documentation"
     ]
   },
   {
@@ -128,11 +128,11 @@
     "created_at": "2025-09-15T20:44:00+08:00",
     "modified_at": "2025-09-15T20:44:00+08:00",
     "audit_log": [
-      "2025-09-15 10:00:00 Document OCR by DocumentAgent – partial/clean extraction",
-      "2025-09-15 10:04:20 Validation check by BizRuleAgent – one or more fields require confirmation",
-      "2025-09-15 10:08:40 Verifying document by JudgmentAgent – queued for manual review",
-      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent – screening in progress",
-      "2025-09-15 10:15:30 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
+      "2025-09-15 10:00:00 Document OCR by DocumentAgent,partial/clean extraction",
+      "2025-09-15 10:04:20 Validation check by BizRuleAgent,one or more fields require confirmation",
+      "2025-09-15 10:08:40 Verifying document by JudgmentAgent,queued for manual review",
+      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent,screening in progress",
+      "2025-09-15 10:15:30 DecisionAgent concluded processing,status INPROCESS,awaiting additional evidence/verification"
     ]
   },
   {
@@ -145,11 +145,11 @@
     "created_at": "2025-09-15T20:46:00+08:00",
     "modified_at": "2025-09-15T20:50:00+08:00",
     "audit_log": [
-      "2025-09-15 11:00:00 Document OCR by DocumentAgent – fields extracted successfully",
-      "2025-09-15 11:05:20 Validation check by BizRuleAgent – format and ID rules passed",
-      "2025-09-15 11:10:40 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
-      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent – no hits detected",
-      "2025-09-15 11:18:30 DecisionAgent concluded processing – status PROCESSED"
+      "2025-09-15 11:00:00 Document OCR by DocumentAgent,fields extracted successfully",
+      "2025-09-15 11:05:20 Validation check by BizRuleAgent,format and ID rules passed",
+      "2025-09-15 11:10:40 Verifying document by JudgmentAgent,selfie match and consistency confirmed",
+      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent,no hits detected",
+      "2025-09-15 11:18:30 DecisionAgent concluded processing,status PROCESSED"
     ]
   },
   {
@@ -162,11 +162,11 @@
     "created_at": "2025-09-15T20:48:00+08:00",
     "modified_at": "2025-09-15T20:54:00+08:00",
     "audit_log": [
-      "2025-09-15 13:45:00 Document OCR by DocumentAgent – low quality/partial capture",
-      "2025-09-15 13:50:15 Validation check by BizRuleAgent – critical rule violation detected",
-      "2025-09-15 13:55:30 Verifying document by JudgmentAgent – mismatch could not be resolved",
-      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
-      "2025-09-15 14:05:10 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
+      "2025-09-15 13:45:00 Document OCR by DocumentAgent,low quality/partial capture",
+      "2025-09-15 13:50:15 Validation check by BizRuleAgent,critical rule violation detected",
+      "2025-09-15 13:55:30 Verifying document by JudgmentAgent,mismatch could not be resolved",
+      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent,step skipped due to validation failure",
+      "2025-09-15 14:05:10 DecisionAgent concluded processing,marked FAILED,insufficient or inconsistent documentation"
     ]
   },
   {
@@ -179,11 +179,11 @@
     "created_at": "2025-09-15T20:50:00+08:00",
     "modified_at": "2025-09-15T20:50:00+08:00",
     "audit_log": [
-      "2025-09-15 08:45:00 Document OCR by DocumentAgent – partial/clean extraction",
-      "2025-09-15 08:50:15 Validation check by BizRuleAgent – one or more fields require confirmation",
-      "2025-09-15 08:55:30 Verifying document by JudgmentAgent – queued for manual review",
-      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent – screening in progress",
-      "2025-09-15 09:05:10 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
+      "2025-09-15 08:45:00 Document OCR by DocumentAgent,partial/clean extraction",
+      "2025-09-15 08:50:15 Validation check by BizRuleAgent,one or more fields require confirmation",
+      "2025-09-15 08:55:30 Verifying document by JudgmentAgent,queued for manual review",
+      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent,screening in progress",
+      "2025-09-15 09:05:10 DecisionAgent concluded processing,status INPROCESS,awaiting additional evidence/verification"
     ]
   },
   {
@@ -196,11 +196,11 @@
     "created_at": "2025-09-15T20:52:00+08:00",
     "modified_at": "2025-09-15T20:56:00+08:00",
     "audit_log": [
-      "2025-09-15 09:10:00 Document OCR by DocumentAgent – fields extracted successfully",
-      "2025-09-15 09:15:20 Validation check by BizRuleAgent – format and ID rules passed",
-      "2025-09-15 09:20:40 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
-      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent – no hits detected",
-      "2025-09-15 09:30:30 DecisionAgent concluded processing – status PROCESSED"
+      "2025-09-15 09:10:00 Document OCR by DocumentAgent,fields extracted successfully",
+      "2025-09-15 09:15:20 Validation check by BizRuleAgent,format and ID rules passed",
+      "2025-09-15 09:20:40 Verifying document by JudgmentAgent,selfie match and consistency confirmed",
+      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent,no hits detected",
+      "2025-09-15 09:30:30 DecisionAgent concluded processing,status PROCESSED"
     ]
   },
   {
@@ -213,11 +213,11 @@
     "created_at": "2025-09-15T20:54:00+08:00",
     "modified_at": "2025-09-15T20:58:00+08:00",
     "audit_log": [
-      "2025-09-15 10:00:00 Document OCR by DocumentAgent – fields extracted successfully",
-      "2025-09-15 10:04:20 Validation check by BizRuleAgent – format and ID rules passed",
-      "2025-09-15 10:08:40 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
-      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent – no hits detected",
-      "2025-09-15 10:15:30 DecisionAgent concluded processing – status PROCESSED"
+      "2025-09-15 10:00:00 Document OCR by DocumentAgent,fields extracted successfully",
+      "2025-09-15 10:04:20 Validation check by BizRuleAgent,format and ID rules passed",
+      "2025-09-15 10:08:40 Verifying document by JudgmentAgent,selfie match and consistency confirmed",
+      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent,no hits detected",
+      "2025-09-15 10:15:30 DecisionAgent concluded processing,status PROCESSED"
     ]
   },
   {
@@ -230,11 +230,11 @@
     "created_at": "2025-09-15T20:56:00+08:00",
     "modified_at": "2025-09-15T21:02:00+08:00",
     "audit_log": [
-      "2025-09-15 11:00:00 Document OCR by DocumentAgent – low quality/partial capture",
-      "2025-09-15 11:05:20 Validation check by BizRuleAgent – critical rule violation detected",
-      "2025-09-15 11:10:40 Verifying document by JudgmentAgent – mismatch could not be resolved",
-      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
-      "2025-09-15 11:18:30 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
+      "2025-09-15 11:00:00 Document OCR by DocumentAgent,low quality/partial capture",
+      "2025-09-15 11:05:20 Validation check by BizRuleAgent,critical rule violation detected",
+      "2025-09-15 11:10:40 Verifying document by JudgmentAgent,mismatch could not be resolved",
+      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent,step skipped due to validation failure",
+      "2025-09-15 11:18:30 DecisionAgent concluded processing,marked FAILED,insufficient or inconsistent documentation"
     ]
   },
   {
@@ -247,11 +247,11 @@
     "created_at": "2025-09-15T20:58:00+08:00",
     "modified_at": "2025-09-15T20:58:00+08:00",
     "audit_log": [
-      "2025-09-15 13:45:00 Document OCR by DocumentAgent – partial/clean extraction",
-      "2025-09-15 13:50:15 Validation check by BizRuleAgent – one or more fields require confirmation",
-      "2025-09-15 13:55:30 Verifying document by JudgmentAgent – queued for manual review",
-      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent – screening in progress",
-      "2025-09-15 14:05:10 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
+      "2025-09-15 13:45:00 Document OCR by DocumentAgent,partial/clean extraction",
+      "2025-09-15 13:50:15 Validation check by BizRuleAgent,one or more fields require confirmation",
+      "2025-09-15 13:55:30 Verifying document by JudgmentAgent,queued for manual review",
+      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent,screening in progress",
+      "2025-09-15 14:05:10 DecisionAgent concluded processing,status INPROCESS,awaiting additional evidence/verification"
     ]
   },
   {
@@ -264,11 +264,11 @@
     "created_at": "2025-09-15T21:00:00+08:00",
     "modified_at": "2025-09-15T21:04:00+08:00",
     "audit_log": [
-      "2025-09-15 08:45:00 Document OCR by DocumentAgent – fields extracted successfully",
-      "2025-09-15 08:50:15 Validation check by BizRuleAgent – format and ID rules passed",
-      "2025-09-15 08:55:30 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
-      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent – no hits detected",
-      "2025-09-15 09:05:10 DecisionAgent concluded processing – status PROCESSED"
+      "2025-09-15 08:45:00 Document OCR by DocumentAgent,fields extracted successfully",
+      "2025-09-15 08:50:15 Validation check by BizRuleAgent,format and ID rules passed",
+      "2025-09-15 08:55:30 Verifying document by JudgmentAgent,selfie match and consistency confirmed",
+      "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent,no hits detected",
+      "2025-09-15 09:05:10 DecisionAgent concluded processing,status PROCESSED"
     ]
   },
   {
@@ -281,11 +281,11 @@
     "created_at": "2025-09-15T21:02:00+08:00",
     "modified_at": "2025-09-15T21:08:00+08:00",
     "audit_log": [
-      "2025-09-15 09:10:00 Document OCR by DocumentAgent – low quality/partial capture",
-      "2025-09-15 09:15:20 Validation check by BizRuleAgent – critical rule violation detected",
-      "2025-09-15 09:20:40 Verifying document by JudgmentAgent – mismatch could not be resolved",
-      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
-      "2025-09-15 09:30:30 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
+      "2025-09-15 09:10:00 Document OCR by DocumentAgent,low quality/partial capture",
+      "2025-09-15 09:15:20 Validation check by BizRuleAgent,critical rule violation detected",
+      "2025-09-15 09:20:40 Verifying document by JudgmentAgent,mismatch could not be resolved",
+      "2025-09-15 09:25:00 WatchList and Namecheck by RiskAgent,step skipped due to validation failure",
+      "2025-09-15 09:30:30 DecisionAgent concluded processing,marked FAILED,insufficient or inconsistent documentation"
     ]
   },
   {
@@ -298,11 +298,11 @@
     "created_at": "2025-09-15T21:04:00+08:00",
     "modified_at": "2025-09-15T21:04:00+08:00",
     "audit_log": [
-      "2025-09-15 10:00:00 Document OCR by DocumentAgent – partial/clean extraction",
-      "2025-09-15 10:04:20 Validation check by BizRuleAgent – one or more fields require confirmation",
-      "2025-09-15 10:08:40 Verifying document by JudgmentAgent – queued for manual review",
-      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent – screening in progress",
-      "2025-09-15 10:15:30 DecisionAgent concluded processing – status INPROCESS – awaiting additional evidence/verification"
+      "2025-09-15 10:00:00 Document OCR by DocumentAgent,partial/clean extraction",
+      "2025-09-15 10:04:20 Validation check by BizRuleAgent,one or more fields require confirmation",
+      "2025-09-15 10:08:40 Verifying document by JudgmentAgent,queued for manual review",
+      "2025-09-15 10:12:00 WatchList and Namecheck by RiskAgent,screening in progress",
+      "2025-09-15 10:15:30 DecisionAgent concluded processing,status INPROCESS,awaiting additional evidence/verification"
     ]
   },
   {
@@ -315,11 +315,11 @@
     "created_at": "2025-09-15T21:06:00+08:00",
     "modified_at": "2025-09-15T21:10:00+08:00",
     "audit_log": [
-      "2025-09-15 11:00:00 Document OCR by DocumentAgent – fields extracted successfully",
-      "2025-09-15 11:05:20 Validation check by BizRuleAgent – format and ID rules passed",
-      "2025-09-15 11:10:40 Verifying document by JudgmentAgent – selfie match and consistency confirmed",
-      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent – no hits detected",
-      "2025-09-15 11:18:30 DecisionAgent concluded processing – status PROCESSED"
+      "2025-09-15 11:00:00 Document OCR by DocumentAgent,fields extracted successfully",
+      "2025-09-15 11:05:20 Validation check by BizRuleAgent,format and ID rules passed",
+      "2025-09-15 11:10:40 Verifying document by JudgmentAgent,selfie match and consistency confirmed",
+      "2025-09-15 11:15:00 WatchList and Namecheck by RiskAgent,no hits detected",
+      "2025-09-15 11:18:30 DecisionAgent concluded processing,status PROCESSED"
     ]
   },
   {
@@ -332,11 +332,11 @@
     "created_at": "2025-09-15T21:08:00+08:00",
     "modified_at": "2025-09-15T21:14:00+08:00",
     "audit_log": [
-      "2025-09-15 13:45:00 Document OCR by DocumentAgent – low quality/partial capture",
-      "2025-09-15 13:50:15 Validation check by BizRuleAgent – critical rule violation detected",
-      "2025-09-15 13:55:30 Verifying document by JudgmentAgent – mismatch could not be resolved",
-      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent – step skipped due to validation failure",
-      "2025-09-15 14:05:10 DecisionAgent concluded processing – marked FAILED – insufficient or inconsistent documentation"
+      "2025-09-15 13:45:00 Document OCR by DocumentAgent,low quality/partial capture",
+      "2025-09-15 13:50:15 Validation check by BizRuleAgent,critical rule violation detected",
+      "2025-09-15 13:55:30 Verifying document by JudgmentAgent,mismatch could not be resolved",
+      "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent,step skipped due to validation failure",
+      "2025-09-15 14:05:10 DecisionAgent concluded processing,marked FAILED,insufficient or inconsistent documentation"
     ]
   }
 ]
