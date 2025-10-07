@@ -1,0 +1,22 @@
+# ==== Non-SG KYC rules (simplified form) ======================================
+# This YAML controls policy/required-ness; code does not hardcode these.
+# Change values here; BizRules will reload automatically (mtime cache).
+
+# General
+min_age: 18
+
+# Basic identity
+require_name: true
+name_min_len: 2
+name_max_len: 80
+# Letters, space, hyphen, dot, apostrophe; must start with a letter
+name_allow_regex: "^[A-Za-z][A-Za-z\\-\\.' ]+$"
+
+# DOB
+require_dob: true
+
+# ID number
+require_id_number: true
+
+# Address (the simplified form uses a single free-text string)
+require_address: true
