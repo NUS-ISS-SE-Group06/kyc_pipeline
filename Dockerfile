@@ -45,6 +45,9 @@ COPY test/ /app/test/
 
 # create the runtime .env (defaults only; NO secrets baked)
 COPY .env.example /app/.env
+# If a real .env exists in the build context (CI), use it; otherwise fall back to the example.
+COPY .env /app/.env
+RUN test -f /app/.env || cp /app/.env.example /app/.env
 
 # Clean up
 RUN find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true \
