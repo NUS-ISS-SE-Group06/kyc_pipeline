@@ -1,0 +1,149 @@
+name: CD-AWS-ECS
+
+on:
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ecs-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: ap-southeast-1
+  ECR_REPO: kyc-app
+  CLUSTER: kyc-app-cluster
+  SERVICE: kyc-app-svc
+  TASK_FAMILY: kyc-app-task
+  CONTAINER_NAME: app
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      image_uri: ${{ steps.out.outputs.image_uri }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (IAM user keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Create .env from template and inject secret
+        run: |
+          cp .env.example .env
+          if grep -q '^OPENAI_API_KEY=' .env; then
+            sed -i "s|^OPENAI_API_KEY=.*|OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}|" .env
+          else
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+          fi
+
+      - name: Build & push image (ARM64; SHA and latest)
+        run: |
+          REGISTRY="${{ steps.ecr.outputs.registry }}"
+          IMAGE_SHA_TAG="$REGISTRY/${ECR_REPO}:${{ github.sha }}"
+          IMAGE_LATEST_TAG="$REGISTRY/${ECR_REPO}:latest"
+
+          docker buildx build \
+            --platform linux/arm64 \
+            -t "$IMAGE_SHA_TAG" \
+            -t "$IMAGE_LATEST_TAG" \
+            --push .
+          echo "IMAGE_URI=$IMAGE_SHA_TAG" >> $GITHUB_ENV
+
+      - name: Remove local .env after build
+        if: always()
+        run: rm -f .env
+
+      - name: Expose image URI
+        id: out
+        run: echo "image_uri=$IMAGE_URI" >> "$GITHUB_OUTPUT"
+
+  register-task-def:
+    runs-on: ubuntu-latest
+    needs: build-image
+    permissions:
+      contents: read
+    outputs:
+      td_arn: ${{ steps.register.outputs.td_arn }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (IAM user keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Fetch current task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition "$TASK_FAMILY" \
+            --query 'taskDefinition' > base.json
+
+      - name: Render new task definition with new image
+        run: |
+          jq --arg IMG "${{ needs.build-image.outputs.image_uri }}" --arg NAME "$CONTAINER_NAME" '
+            .containerDefinitions = (.containerDefinitions | map(
+              if .name == $NAME then .image = $IMG | . else . end
+            ))
+            | {family, networkMode, requiresCompatibilities, cpu, memory,
+               executionRoleArn, taskRoleArn, runtimePlatform, containerDefinitions}
+          ' base.json > new-taskdef.json
+
+      - name: Register new task definition
+        id: register
+        run: |
+          TD_ARN=$(aws ecs register-task-definition \
+            --cli-input-json file://new-taskdef.json \
+            --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "td_arn=$TD_ARN" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: register-task-def
+    steps:
+      - name: Configure AWS credentials (IAM user keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Update ECS service (rolling deploy)
+        run: |
+          aws ecs update-service \
+            --cluster "$CLUSTER" \
+            --service "$SERVICE" \
+            --task-definition "${{ needs.register-task-def.outputs.td_arn }}" \
+            --force-new-deployment
+
+      - name: Wait for service to stabilize
+        run: |
+          aws ecs wait services-stable \
+            --cluster "$CLUSTER" \
+            --services "$SERVICE" \
+            --region "${{ env.AWS_REGION }}"

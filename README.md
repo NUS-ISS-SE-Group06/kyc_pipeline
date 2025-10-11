@@ -45,36 +45,11 @@ An event-driven KYC pipeline that starts when a document lands in S3. A ManagerC
 
 ### Installation
 
-First, if you haven't already, install `ollama` and `uv`
+First, if you haven't already, install `uv`
 
 ```bash
-    brew install ollama
     pip install uv
     uv --version
-```
-
-#### Start/Stop Ollama
-
-Next, go to `/script` directory
-
-```bash
-    #set executable permission: 
-    #chmod +x start-ollama.sh / chmod +x stop-ollama.sh
-    cd /script  
-
-    # Start Ollama    
-    ./start-ollama.sh
-
-    # Stop Ollama
-    ./stop-ollama.sh
-```
-
-#### Run LLM model
-
-Next, once ollama is up, you can Run any LLM model, here we are using `llama3.2:3b`
-
-```bash
-    ollama run llama3.2:3b
 ```
 
 Next, navigate to your project directory and install the dependencies:
@@ -157,32 +132,32 @@ curl -X POST http://localhost:8000/run \
   -d '{"doc_id":"KYC-1","s3_uri":"s3://bucket/file.jpg","doc_type":"KYC","to_email":"user@example.com"}'
 
 # To get KYC Status
-1. Get all records:
+#1. Get all records:
 curl http://localhost:8000/kyc_status
 
-2. Filter by status:
+#2. Filter by status:
 curl http://localhost:8000/kyc_status?final_decision=PROCESSED
 curl http://localhost:8000/kyc_status?final_decision=FAILED
 
-3. Search by customer name:
+#3. Search by customer name:
 curl http://localhost:8000/kyc_status?customer_name=Patel
 curl http://localhost:8000/kyc_status?customer_name=Sarah
 
-4. Filter by identification number:
+#4. Filter by identification number:
 curl http://localhost:8000/kyc_status?identification_no=S1234567A
 
-5. Filter by date range:
+#5. Filter by date range:
 curl http://localhost:8000/kyc_status?from_date=2025-09-15&to_date=2025-09-15
 
-6. Combine multiple filters:
+#6. Combine multiple filters:
 curl http://localhost:8000/kyc_status?final_decision=PROCESSED&from_date=2025-09-15
 curl http://localhost:8000/kyc_status?customer_name=Lee&final_decision=INPROCESS
 
-7. Pagination:
+#7. Pagination:
 curl http://localhost:8000/kyc_status?limit=5&offset=0    # First 5 records
 curl http://localhost:8000/kyc_status?limit=5&offset=5    # Next 5 records
 
-8. Complex query:
+#8. Complex query:
 curl http://localhost:8000/kyc_status?final_decision=PROCESSED&from_date=2025-09-15&limit=10
 ```
 
