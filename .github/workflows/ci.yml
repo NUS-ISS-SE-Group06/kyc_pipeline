@@ -79,23 +79,23 @@ jobs:
         run: uv run pytest -v
         # Optional coverage:
         # run: uv run pytest -v --cov=kyc_pipeline --cov-report=term-missing
+
   promptfoo:
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
 
       - name: Create .env for Promptfoo
-        # Map any provider keys you need here from GitHub Secrets
         run: |
           cat > .env << 'EOF'
-          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY_PROMPTFOO }}
           EOF
 
       - name: Run Promptfoo (verbose, no cache)
