@@ -30,6 +30,11 @@ train = "kyc_pipeline.main:train"
 replay = "kyc_pipeline.main:replay"
 test = "kyc_pipeline.main:test"
 
+[project.optional-dependencies]
+dev = [
+    "flake8>=7.3.0",
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
