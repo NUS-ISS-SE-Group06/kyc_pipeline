@@ -39,7 +39,7 @@ jobs:
             ${{ runner.os }}-uv-${{ matrix.python-version }}-
           
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --dev
 
       - name: Lint with flake8
         run: |
@@ -47,7 +47,7 @@ jobs:
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
   test:
-    name: 🧪 Run Tests
+    name: 🧪 Run Test
     runs-on: ubuntu-latest
     needs: build-cache
     strategy:
