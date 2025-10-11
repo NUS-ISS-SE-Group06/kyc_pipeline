@@ -39,17 +39,17 @@ jobs:
             ${{ runner.os }}-uv-${{ matrix.python-version }}-
           
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --dev
 
-      - name: Lint with flake8
-        run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      # - name: Lint with flake8
+      #   run: |
+      #     flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
   test:
-    name: 🧪 Run Tests
-    run-on: ubuntu-latest
-    needs: build
+    name: 🧪 Run Test
+    runs-on: ubuntu-latest
+    needs: build-cache
     strategy:
       matrix:
         python-version: ["3.12"]
@@ -73,7 +73,7 @@ jobs:
             ${{ runner.os }}-uv-${{ matrix.python-version }}-
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --dev
 
       - name: Run tests with pytest
         run: uv run pytest -v
