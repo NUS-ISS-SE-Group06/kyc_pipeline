@@ -100,18 +100,16 @@ jobs:
 
       - name: Run Promptfoo (verbose, no cache)
         run: |
+          # Write results to JSON + HTML; also keep console output
           npx promptfoo@latest eval \
             -c ./promptfooconfig.yaml \
             --env-path .env \
             --no-cache \
             --verbose \
-            --format junit -o promptfoo-results.xml
-          # Optional extra outputs:
-          npx promptfoo@latest eval \
-            -c ./promptfooconfig.yaml \
-            --env-path .env \
-            --no-cache \
-            --format markdown -o promptfoo-summary.md || true
+            --no-share \
+            --no-progress-bar \
+            -o promptfoo-results.json \
+            -o promptfoo-results.html | tee promptfoo-console.txt
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
