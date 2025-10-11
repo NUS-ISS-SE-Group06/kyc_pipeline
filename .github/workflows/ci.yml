@@ -79,3 +79,53 @@ jobs:
         run: uv run pytest -v
         # Optional coverage:
         # run: uv run pytest -v --cov=kyc_pipeline --cov-report=term-missing
+  promptfoo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Create .env for Promptfoo
+        # Map any provider keys you need here from GitHub Secrets
+        run: |
+          cat > .env << 'EOF'
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          EOF
+
+      - name: Run Promptfoo (verbose, no cache)
+        run: |
+          npx promptfoo@latest eval \
+            -c ./promptfooconfig.yaml \
+            --env-path .env \
+            --no-cache \
+            --verbose \
+            --format junit -o promptfoo-results.xml
+          # Optional extra outputs:
+          npx promptfoo@latest eval \
+            -c ./promptfooconfig.yaml \
+            --env-path .env \
+            --no-cache \
+            --format markdown -o promptfoo-summary.md || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: promptfoo-artifacts
+          path: |
+            promptfoo-results.xml
+            promptfoo-summary.md
+            .promptfoo/**
+
+      - name: Publish test summary
+        if: always()
+        run: |
+          if [ -f promptfoo-summary.md ]; then
+            echo "## Promptfoo Summary" >> $GITHUB_STEP_SUMMARY
+            cat promptfoo-summary.md >> $GITHUB_STEP_SUMMARY
+          fi
