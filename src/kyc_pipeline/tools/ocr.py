@@ -92,7 +92,7 @@ def _render_pdf_first_page_to_bgr(pdf_path: str):
         raise ValueError("PDF has no pages.")
     page = doc.load_page(0)
     # 2.0 to get a higher-res raster for better OCR; adjust if needed
-    pix = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False) # type: ignore[attr-defined]
+    pix = page.get_pixmap(matrix=fitz.Matrix(2, 2), alpha=False) # type: ignore[attr-defined]\
     import numpy as np  # numpy comes with opencv wheels
 
     img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, pix.n)
