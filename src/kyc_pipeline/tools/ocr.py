@@ -2,11 +2,19 @@ import os
 import re
 import tempfile
 from typing import Optional
+import logging
 
 from crewai.tools import tool
 import pytesseract
 from PIL import Image
 import cv2
+
+# Configure global logging format (do this once)
+logging.basicConfig(
+    level=logging.INFO,  # or DEBUG if you want more details
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 # --- Optional MIME helpers (graceful fallbacks) ---
 _magic = None
@@ -139,15 +147,19 @@ def ocr_extract(s3_uri: str) -> str:
 
     # 1) Existence & size
     if not os.path.exists(image_path):
+        logger.error(f"❌ File not found: {image_path}")
         raise FileNotFoundError(f"File not found: {image_path}")
 
     file_size_mb = os.path.getsize(image_path) / (1024 * 1024)
     if file_size_mb > MAX_FILE_SIZE_MB:
+        logger.warning(f"File too large: {file_size_mb:.2f} MB (limit: {MAX_FILE_SIZE_MB})")
         raise ValueError(f"File too large ({file_size_mb:.2f} MB). Limit is {MAX_FILE_SIZE_MB} MB.")
 
     # 2) MIME type
     mime_type = _detect_mime(image_path)
+    logger.debug(f"Detected MIME type: {mime_type}")
     if mime_type not in ALLOWED_MIME_TYPES:
+        logger.error(f"Unsupported file type: {mime_type}")
         raise ValueError(f"Unsupported file type: {mime_type}")
 
     # 3) Load → preprocess → OCR
@@ -156,6 +168,7 @@ def ocr_extract(s3_uri: str) -> str:
     else:
         img_bgr = cv2.imread(image_path)
         if img_bgr is None:
+            logger.error("Unable to read image (possibly corrupted or unsupported).")
             raise ValueError("Unable to read image (possibly corrupted or unsupported).")
 
     raw_text = _preprocess_for_ocr(img_bgr)
@@ -164,5 +177,5 @@ def ocr_extract(s3_uri: str) -> str:
     safe_text = validate_ocr_text_safety(raw_text)
 
     # Optional: minimal success log (Crew tools can print to stderr/stdout)
-    print("✅ OCR completed successfully and text sanitized.")
+    logger.info("✅ OCR completed successfully and text sanitized.")
     return safe_text
