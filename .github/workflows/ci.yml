@@ -79,3 +79,51 @@ jobs:
         run: uv run pytest -v
         # Optional coverage:
         # run: uv run pytest -v --cov=kyc_pipeline --cov-report=term-missing
+
+  promptfoo:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Create .env for Promptfoo
+        run: |
+          cat > .env << 'EOF'
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY_PROMPTFOO }}
+          EOF
+
+      - name: Run Promptfoo (verbose, no cache)
+        run: |
+          # Write results to JSON + HTML; also keep console output
+          npx promptfoo@latest eval \
+            -c ./promptfooconfig.yaml \
+            --env-path .env \
+            --no-cache \
+            --verbose \
+            --no-share \
+            --no-progress-bar \
+            -o promptfoo-results.json \
+            -o promptfoo-results.html | tee promptfoo-console.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: promptfoo-artifacts
+          path: |
+            promptfoo-results.xml
+            promptfoo-summary.md
+            .promptfoo/**
+
+      - name: Publish test summary
+        if: always()
+        run: |
+          if [ -f promptfoo-summary.md ]; then
+            echo "## Promptfoo Summary" >> $GITHUB_STEP_SUMMARY
+            cat promptfoo-summary.md >> $GITHUB_STEP_SUMMARY
+          fi
