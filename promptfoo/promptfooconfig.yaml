@@ -1,0 +1,60 @@
+version: 1
+providers:
+  - id: openai:gpt-4o-mini
+    config:
+      temperature: 0
+
+prompts:
+  - id: decision-agent
+    label: "Decision Agent prompt"
+    raw: |-
+      You are the Decision Agent in a KYC pipeline.
+      Given: extracted fields, judge verdict, business-rules hint, and risk grade,
+      produce a **short** final decision and a short explanation.
+
+      Return output in exactly two lines:
+      Final decision: <Approve | Reject | Manual Review>
+      Explanation: <one concise sentence>
+
+tests:
+  - description: "Approve path: high confidence, LOW risk, APPROVE hint"
+    vars:
+      extracted_name: "Sarah Lee"
+      judge_passed: true
+      judge_confidence: 0.92
+      rules_hint: "APPROVE"
+      risk_grade: "LOW"
+      explanation: "All KYC checks passed successfully."
+    assert:
+      - type: contains
+        value: "Final decision: Approve"
+      - type: contains
+        value: "Explanation:"
+
+  - description: "Reject path: low confidence, HIGH risk, REJECT hint"
+    vars:
+      extracted_name: "John Patel"
+      judge_passed: false
+      judge_confidence: 0.41
+      rules_hint: "REJECT"
+      risk_grade: "HIGH"
+      explanation: "Matched on fraud watchlist and ID mismatch."
+    assert:
+      - type: contains
+        value: "Final decision: Reject"
+      - type: contains
+        value: "Explanation:"
+
+  - description: "Manual Review path: unclear fields, MEDIUM risk, REVIEW hint"
+    vars:
+      extracted_name: "A. Gomez"
+      judge_passed: false
+      judge_confidence: 0.65
+      rules_hint: "REVIEW"
+      risk_grade: "MEDIUM"
+      explanation: "Address is incomplete; DOB unclear."
+    assert:
+      - type: contains
+        value: "Final decision: Manual Review"
+      - type: contains
+        value: "Explanation:"
