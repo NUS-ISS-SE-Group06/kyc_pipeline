@@ -7,14 +7,18 @@ from kyc_pipeline.tools.runlog import persist_runlog
 import pytest
 
 
-def _call_persist_runlog(**kwargs) -> str:
-    """
-    Calls persist_runlog regardless of whether it's a plain function
-    or a CrewAI Tool (with .run).
-    """
-    if hasattr(persist_runlog, "run"):
-        return persist_runlog.run(**kwargs)  # Tool-wrapped
-    return persist_runlog(**kwargs)          # Plain function
+def _call_persist_runlog(payload_json: str, out_dir: str, filename: str) -> str:
+    """Helper function to call persist_runlog and handle paths."""
+    out_dir_path = Path(out_dir)
+    out_dir_path.mkdir(parents=True, exist_ok=True)
+    
+    # This is the key change: We construct the full path for the tool to use.
+    full_path = out_dir_path / filename
+    
+    print(f"Using Tool: {persist_runlog.name}")
+    # We pass the full path as the 'filename' argument to the tool.
+    result = persist_runlog.run(payload_json=payload_json, filename=str(full_path))
+    return result
 
 
 def _is_iso_seconds(ts: str) -> bool:

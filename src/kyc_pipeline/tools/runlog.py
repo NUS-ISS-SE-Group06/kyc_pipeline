@@ -1,52 +1,48 @@
-from crewai.tools import tool
+import json
+import os
 from pathlib import Path
-from datetime import datetime
-from typing import Union
-import os, json
+from datetime import datetime, timezone
 
-def _ensure_str(s) -> str:
-    if isinstance(s, (dict, list)):
-        return json.dumps(s, ensure_ascii=False)
-    return str(s)
+# This is the corrected import path for BaseTool
+from crewai.tools import BaseTool
 
-@tool("persist_runlog")
-def persist_runlog(
-        payload_json: Union[str, dict, list],
-        out_dir: str = "runlogs",
-        filename: str = "runlog.json",   # <- always overwrite this file
-) -> str:
-    """
-    Save the given payload_json STRING into a fixed file, overwriting on each call.
+class PersistRunlogTool(BaseTool):
+    name: str = "persist_runlog"
+    description: str = (
+        "Saves a JSON payload to a file, returning a JSON receipt."
+        " Overwrites the file if it exists. Creates directories if needed."
+    )
 
-    Args:
-      payload_json: JSON string to save (dict/list will be json.dumps'ed).
-      out_dir: directory to store the file (default: runlogs). Can override with env RUNLOG_DIR.
-      filename: target filename (default: runlog.json). Can override with env RUNLOG_FILE.
+    def _run(self, payload_json: str | dict, filename: str | None = None) -> str:
+        """
+        Saves the run log. The filename is determined by environment variables
+        if not explicitly provided.
+        """
+        if filename:
+            out_path = Path(filename)
+        else:
+            runlog_dir = os.environ.get("RUNLOG_DIR", "runlogs/")
+            runlog_file = os.environ.get("RUNLOG_FILE", "runlog.json")
+            out_path = Path(runlog_dir) / runlog_file
 
-    Returns:
-      JSON string: {"saved_to": "<path>", "bytes": <len>, "overwritten": true, "saved_at": "<iso8601>"}
-    """
-    payload_str = _ensure_str(payload_json)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Allow env overrides
-    out_dir = os.getenv("RUNLOG_DIR", out_dir)
-    filename = os.getenv("RUNLOG_FILE", filename)
+        if isinstance(payload_json, dict):
+            content_to_write = json.dumps(payload_json)
+        else:
+            content_to_write = str(payload_json)
 
-    # Ensure directory exists
-    out_path = Path(out_dir)
-    out_path.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(content_to_write, encoding="utf-8")
+        
+        print(f"[{self.name}] overwrote {out_path} ({len(content_to_write)} bytes)")
 
-    file_path = out_path / filename
+        receipt = {
+            "saved_to": str(out_path),
+            "bytes": len(content_to_write),
+            "overwritten": True,
+            "saved_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        }
+        return json.dumps(receipt)
 
-    # OVERWRITE the same file each time
-    with file_path.open("w", encoding="utf-8") as f:
-        f.write(payload_str)
+persist_runlog = PersistRunlogTool()
 
-    result = {
-        "saved_to": str(file_path),
-        "bytes": len(payload_str),
-        "overwritten": True,
-        "saved_at": datetime.now().isoformat(timespec="seconds")
-    }
-    print(f"[persist_runlog] overwrote {result['saved_to']} ({result['bytes']} bytes)")
-    return json.dumps(result, ensure_ascii=False)

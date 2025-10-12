@@ -71,15 +71,25 @@ class KYCPipelineCrew:
             max_iter=1
         )
 
+    # ===================================================================
+    # START:  A5: DecisionAgent Code
+    # ===================================================================
     @agent
-    def notifier(self) -> Agent:
+    def decision_agent(self) -> Agent:
+        """
+        This is your agent, A5. It makes the final decision.
+        """
         return Agent(
-            config=self.agents_config['notifier'], 
+            config=self.agents_config['decision_agent'], # decision config to be setup inside agents.yaml
             tools=[send_decision_email, persist_runlog], 
             verbose=True,
             llm=llmrouter(),
-            max_iter=1
+            max_iter=1,
+            allow_delegation=False,
         )
+    # ===================================================================
+    # END: Y A5: DecisionAgent Code
+    # ===================================================================
 
     # ──────────────── Tasks ────────────────
     @task
@@ -111,12 +121,28 @@ class KYCPipelineCrew:
             agent=self.risk(), 
         )
 
+    # ===================================================================
+    # START:  Decision Task Code
+    # ===================================================================
     @task
-    def notify_task(self) -> Task:
+    def decision_task(self) -> Task:
+        """
+        This is the task for your agent. It defines the final goal.
+        """
         return Task(
-            config=self.tasks_config['notify_task'], 
-            agent=self.notifier(), 
+            config=self.tasks_config['decision_task'], # decision task already  config to tasks.yaml
+            agent=self.decision_agent(),
+            # The context will be the combined output from all previous tasks
+            context=[
+                self.extract_task(),
+                self.judge_task(),
+                self.bizrules_task(),
+                self.risk_task()
+            ]
         )
+    # ===================================================================
+    # END: Decision Task Code
+    # ===================================================================
 
     # ──────────────── Crew ────────────────
     @crew
