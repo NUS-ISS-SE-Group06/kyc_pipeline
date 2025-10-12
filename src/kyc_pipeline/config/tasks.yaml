@@ -77,16 +77,27 @@ judge_task:
     - If any field format invalid (e.g., DOB not YYYY-MM-DD), return null and explain in rework_notes.
 
 
+
 bizrules_task:
-  description: >
-    Load organization rules for {doc_type} and evaluate the case.
-    Produce violations[] with citations and a decision_hint ("APPROVE" or "REJECT").
-    Call this service exactly once.
+  description: |
+    Validate the extracted KYC payload against the business rules for org 'non-sg-default'.
+
+    You may:
+      • Call evaluate_business_rules("non-sg-default", <EXTRACTED_JSON_STRING>) directly to evaluate the case.
+        This is usually sufficient, because evaluation automatically loads the rules internally.
+      • Optionally call fetch_business_rules("non-sg-default") if you need to reference or summarize the active rules
+        before evaluating. This is not required to make a decision.
+
+    You must produce a JSON object with a `violations` list and a `decision_hint` ("APPROVE" or "REJECT").
+    Call at most one tool — either evaluate directly or fetch + evaluate inside that single call if needed.
   expected_output: |
-    JSON RuleEvaluation: {
-      "violations": [{"code": "string", "text": "string", "citation": "string"}][],
+    {
+      "violations": [{"code": "string", "text": "string", "citation": "string"}],
       "decision_hint": "APPROVE"|"REJECT"
     }
+
+
+
 
 risk_task:
   description: >

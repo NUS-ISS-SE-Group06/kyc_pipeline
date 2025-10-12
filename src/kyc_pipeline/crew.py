@@ -1,7 +1,7 @@
 from crewai import Agent, Crew, Process, Task, LLM
 from crewai.project import CrewBase, agent, crew, task
 from .tools.ocr import ocr_extract
-from .tools.bizrules import fetch_business_rules
+from kyc_pipeline.tools.bizrule import fetch_business_rules, evaluate_business_rules
 from .tools.watchlist import watchlist_search
 from .tools.notify import send_decision_email
 from .tools.runlog import persist_runlog
@@ -52,7 +52,8 @@ class KYCPipelineCrew:
     def bizrules(self) -> Agent:
         return Agent(
             config=self.agents_config['bizrules'], 
-            tools=[fetch_business_rules, persist_runlog], 
+            #tools=[fetch_business_rules, persist_runlog], 
+            tools=[fetch_business_rules, evaluate_business_rules, persist_runlog],
             verbose=True,
             llm=llmrouter(),
             max_iter=1
