@@ -46,7 +46,7 @@ def _maybe_real_send(to: Optional[str], subject: str, body_md: str) -> str:
     return "email-stub"
 
 
-@tool("send_decision_email")
+@tool("trigger_decision_email")
 def send_decision_email(decision: str, explanation: str, to: Optional[str] = None) -> str:
     """
     Send a decision notification email.
@@ -58,3 +58,5 @@ def send_decision_email(decision: str, explanation: str, to: Optional[str] = Non
     body_md = f"Decision: {decision}\nReason: {explanation}"
     result_id = _maybe_real_send(to, subject, body_md)
     return result_id
+# keep the function name as-is, but export an alias for import convenience
+trigger_decision_email = send_decision_email

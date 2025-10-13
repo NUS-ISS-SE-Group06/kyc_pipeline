@@ -4,9 +4,9 @@ from .tools.ocr import ocr_extract
 from .tools.bizrules import fetch_business_rules
 from .tools.watchlist import watchlist_search
 #from .tools.notify import send_decision_email
-#from .tools.runlog import persist_runlog
+from .tools.runlog import persist_runlog
 from .router.router import llmrouter
-from .tools.emails_decision import send_decision_email
+from .tools.emails_decision import  trigger_decision_email
 from .tools.persist import save_decision_record
 from .models import FinalDecision
 
@@ -74,16 +74,8 @@ class KYCPipelineCrew:
             max_iter=1
         )
 
-    @agent
-    def notifier(self) -> Agent:
-        return Agent(
-            config=self.agents_config['notifier'], 
-            tools=[send_decision_email, persist_runlog], 
-            verbose=True,
-            llm=llmrouter(),
-            max_iter=1
-        )
-    
+   
+ 
 
   # Decision Agent
     @agent
@@ -101,7 +93,7 @@ class KYCPipelineCrew:
         ),
         allow_delegation=False,
         llm=llmrouter(),
-        tools=[send_decision_email, save_decision_record],
+        tools=[trigger_decision_email, save_decision_record],
         verbose=True,
         max_iter=1,
         )
@@ -136,12 +128,6 @@ class KYCPipelineCrew:
             agent=self.risk(), 
         )
 
-    @task
-    def notify_task(self) -> Task:
-        return Task(
-            config=self.tasks_config['notify_task'], 
-            agent=self.notifier(), 
-        )
     
     @task
     def decision_task(self) -> Task:
@@ -177,14 +163,14 @@ class KYCPipelineCrew:
                 self.judge(),
                 self.bizrules(),
                 self.risk(),
-                self.notifier(),
+                self.decision_agent(),
             ],
             tasks=[
                 self.extract_task(),
                 self.judge_task(),
                 self.bizrules_task(),
                 self.risk_task(),
-                self.notify_task(),
+                self.decision_task(),
             ],
             process=Process.hierarchical,   # manager-led agentic flow
             manager_agent=self.planner(),
