@@ -1,53 +1,53 @@
-# tests/test_emails_decision.py
+# tests/test_emails_decision_tool.py
+import os
+import importlib
+import inspect
+
 import pytest
 
-# Try both common layouts; adjust if your project uses a different path.
-try:
-    # e.g. if your code lives at kyc_pipeline/tools/notify.py
-    from kyc_pipeline.tools.notify import send_decision_email  # type: ignore
-except Exception:  # pragma: no cover
-    # e.g. if your code lives at src/tools/notify.py
-    from src.tools.notify import send_decision_email  # type: ignore
+MODULE_PATH = "kyc_pipeline.tools.emails_decision"
 
 
-@pytest.mark.parametrize(
-    "to,subject,body_md",
-    [
-        ("alice@example.com", "Approved", "# Congrats\nYou’re approved."),
-        ("bob@example.com", "Rejected", "## Sorry\nYour request was rejected."),
-        ("", "", ""),  # empty strings still return a message id in the stub
-    ],
-)
-def test_send_decision_email_func_returns_message_id(to, subject, body_md):
-    """
-    Call the underlying function via .func and verify the deterministic stub output.
-    Your notify.py should look like:
-
-        from crewai.tools import tool
-
-        @tool("send_decision_email")
-        def send_decision_email(to: str, subject: str, body_md: str) -> str:
-            return "msg-001"
-    """
-    result = send_decision_email.func(to, subject, body_md)
-    assert isinstance(result, str)
-    assert result == "msg-001"
+def test_tool_is_importable():
+    mod = importlib.import_module(MODULE_PATH)
+    assert hasattr(mod, "send_decision_email")
 
 
-@pytest.mark.parametrize(
-    "to,subject,body_md",
-    [
-        ("carol@example.com", "KYC Result", "**Processed**"),
-        ("dave@example.com", "Notice", "_Pending review_"),
-    ],
-)
-def test_send_decision_email_run_matches_func(to, subject, body_md):
-    """
-    Ensure Tool.run() path matches the underlying function output.
-    CrewAI's Tool.run generally forwards to the registered callable.
-    """
-    via_func = send_decision_email.func(to, subject, body_md)
-    via_run = send_decision_email.run(to, subject, body_md)
-    assert via_func == "msg-001"
-    assert via_run == "msg-001"
-    assert via_run == via_func
+def test_run_signature_accepts_decision_and_explanation():
+    mod = importlib.import_module(MODULE_PATH)
+    tool = mod.send_decision_email
+    # CrewAI Tool exposes .run that forwards to the registered function
+    sig = inspect.signature(tool.run)
+    # We only need it to accept at least 2 positional args
+    params = list(sig.parameters.values())
+    assert len(params) >= 2
+
+
+def test_stub_path_is_deterministic_when_provider_unset(monkeypatch: pytest.MonkeyPatch):
+    """With no EMAIL_PROVIDER configured, tool should return a stable stub id."""
+    mod = importlib.import_module(MODULE_PATH)
+    tool = mod.send_decision_email
+
+    # Clear provider to force stub
+    monkeypatch.delenv("EMAIL_PROVIDER", raising=False)
+
+    res = tool.run("Approve", "All KYC checks passed", None)
+    assert isinstance(res, str)
+    # by default our implementation returns "email-stub"
+    assert res.startswith("email-stub")
+
+
+def test_smtp_provider_without_creds_falls_back_to_stub(monkeypatch: pytest.MonkeyPatch):
+    """If SMTP provider selected but creds are missing, we still return a stub id."""
+    mod = importlib.import_module(MODULE_PATH)
+    tool = mod.send_decision_email
+
+    # Force SMTP but remove creds
+    monkeypatch.setenv("EMAIL_PROVIDER", "smtp")
+    for k in ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASSWORD", "SMTP_SENDER", "DEFAULT_TO"]:
+        monkeypatch.delenv(k, raising=False)
+
+    res = tool.run("Reject", "Watchlist match", "user@example.com")
+    assert isinstance(res, str)
+    # our implementation uses this specific marker when SMTP config is incomplete
+    assert res in {"email-stub:missing-smtp-config", "email-stub"}

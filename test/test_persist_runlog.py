@@ -92,11 +92,7 @@ def test_env_overrides(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("RUNLOG_FILE", raising=False)
 
 
-def test_creates_directory(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    # Ensure no environment override interferes with this test
-    monkeypatch.delenv("RUNLOG_DIR", raising=False)
-    monkeypatch.delenv("RUNLOG_FILE", raising=False)
-
+def test_creates_directory(tmp_path: Path):
     out_dir = tmp_path / "nested" / "deep" / "runlogs"
     res_json = _call_persist_runlog(payload_json="x", out_dir=str(out_dir), filename="f.json")
     res = json.loads(res_json)

@@ -1,144 +1,80 @@
-# tests/test_persist.py
+# tests/test_persist_tool.py
+from __future__ import annotations
+
 import json
 from pathlib import Path
-from datetime import datetime
+import importlib
 
 import pytest
 
-# Import the tool/function robustly (adjust if your layout differs)
-try:
-    # e.g., kyc_pipeline/tools/runlog.py
-    from kyc_pipeline.tools.runlog import persist_runlog  # type: ignore
-except Exception:  # pragma: no cover
-    # e.g., src/tools/runlog.py
-    from src.tools.runlog import persist_runlog  # type: ignore
+MODULE_PATH = "kyc_pipeline.tools.persist"
 
 
-def _call_persist_runlog(**kwargs) -> str:
-    """
-    Calls persist_runlog regardless of whether it's a plain function
-    or a CrewAI Tool (with .run).
-    """
-    if hasattr(persist_runlog, "run"):
-        return persist_runlog.run(**kwargs)  # Tool-wrapped
-    return persist_runlog(**kwargs)          # Plain function
+def _read_last_jsonl(path: Path):
+    with path.open("r", encoding="utf-8") as f:
+        lines = [ln.strip() for ln in f if ln.strip()]
+    assert lines, "Audit file should have at least one line"
+    return json.loads(lines[-1])
 
 
-def _is_iso_seconds(ts: str) -> bool:
-    try:
-        dt = datetime.fromisoformat(ts)
-        return dt.microsecond == 0
-    except Exception:
-        return False
+def test_persist_writes_jsonl_and_returns_metadata(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """save_decision_record should append to JSONL and attempt SQLite insert."""
+    mod = importlib.import_module(MODULE_PATH)
+    tool = mod.save_decision_record
+
+    audit_dir = tmp_path / "aud"
+    db_path = tmp_path / "db" / "kyc_runs.db"
+
+    monkeypatch.setenv("DECISIONS_AUDIT_DIR", str(audit_dir))
+    monkeypatch.setenv("DECISIONS_DB_PATH", str(db_path))
+
+    out = tool.run(
+        "Approve",
+        "All checks passed",
+        "DOC-001",
+        "Sarah Lee",
+        "S1234567A",
+    )
+    meta = json.loads(out)
+
+    # audit file exists and is append-only JSONL
+    assert "audit_file" in meta
+    audit_file = Path(meta["audit_file"])
+    assert audit_file.exists()
+
+    last = _read_last_jsonl(audit_file)
+    assert last["final_decision"] == "Approve"
+    assert last["explanation"] == "All checks passed"
+    assert last["doc_id"] == "DOC-001"
+    assert last["customer_name"] == "Sarah Lee"
+    assert last["identification_no"] == "S1234567A"
+    assert "created_at" in last and isinstance(last["created_at"], str)
+
+    # DB row id is optional (None if DB write failed), but key should be present
+    assert "db_row_id" in meta
 
 
-def test_writes_and_overwrites(tmp_path: Path, capsys: pytest.CaptureFixture):
-    out_dir = tmp_path / "runlogs"
-    filename = "runlog.json"
+def test_persist_appends_multiple_records(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    mod = importlib.import_module(MODULE_PATH)
+    tool = mod.save_decision_record
+
+    audit_dir = tmp_path / "aud2"
+    db_path = tmp_path / "db2" / "runs.db"
+
+    monkeypatch.setenv("DECISIONS_AUDIT_DIR", str(audit_dir))
+    monkeypatch.setenv("DECISIONS_DB_PATH", str(db_path))
 
     # First write
-    res1_json = _call_persist_runlog(
-        payload_json='{"a":1}',
-        out_dir=str(out_dir),
-        filename=filename,
-    )
-    res1 = json.loads(res1_json)
+    tool.run("Manual Review", "Address incomplete", "DOC-100", "A. Gomez", "G7654321Z")
+    # Second write
+    tool.run("Reject", "Watchlist match", "DOC-101", "John Patel", "P1111111B")
 
-    saved = Path(res1["saved_to"])
-    assert saved.exists()
-    assert saved.read_text(encoding="utf-8") == '{"a":1}'
-    assert res1["bytes"] == len('{"a":1}')
-    assert res1["overwritten"] is True
-    assert _is_iso_seconds(res1["saved_at"])
+    audit_file = audit_dir / "decisions.jsonl"
+    assert audit_file.exists()
+    lines = [ln for ln in audit_file.read_text(encoding="utf-8").splitlines() if ln.strip()]
+    assert len(lines) == 2
 
-    # Confirm print
-    out = capsys.readouterr().out
-    assert "[persist_runlog] overwrote" in out
-    assert str(saved) in out
-
-    # Second write (overwrite)
-    res2_json = _call_persist_runlog(
-        payload_json="second",
-        out_dir=str(out_dir),
-        filename=filename,
-    )
-    res2 = json.loads(res2_json)
-
-    assert saved.read_text(encoding="utf-8") == "second"
-    assert res2["bytes"] == len("second")
-    assert res2["overwritten"] is True
-    assert _is_iso_seconds(res2["saved_at"])
-
-
-def test_handles_non_string_payload(tmp_path: Path):
-    payload = {"x": 1, "y": ["a", "b"]}
-    res_json = _call_persist_runlog(
-        payload_json=payload,
-        out_dir=str(tmp_path / "logs"),
-        filename="data.json",
-    )
-    res = json.loads(res_json)
-
-    saved = Path(res["saved_to"])
-    assert saved.exists()
-
-    text = saved.read_text(encoding="utf-8")
-    assert json.loads(text) == payload
-    assert res["bytes"] == len(text)
-    assert res["overwritten"] is True
-    assert _is_iso_seconds(res["saved_at"])
-
-
-def test_env_overrides(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    env_dir = tmp_path / "envlogs"
-    env_file = "envrun.json"
-    monkeypatch.setenv("RUNLOG_DIR", str(env_dir))
-    monkeypatch.setenv("RUNLOG_FILE", env_file)
-
-    res_json = _call_persist_runlog(
-        payload_json="hello",
-        out_dir=str(tmp_path / "ignored"),
-        filename="ignored.json",
-    )
-    res = json.loads(res_json)
-
-    saved = Path(res["saved_to"])
-    # Prefer exact match if the tool honors env vars
-    if saved != env_dir / env_file:
-        # Fall back: at least ensure it saved where it wanted and content is correct
-        assert saved.exists()
-    else:
-        assert saved.exists()
-        assert saved.read_text(encoding="utf-8") == "hello"
-        assert res["bytes"] == len("hello")
-        assert res["overwritten"] is True
-        assert _is_iso_seconds(res["saved_at"])
-
-    # cleanup env
-    monkeypatch.delenv("RUNLOG_DIR", raising=False)
-    monkeypatch.delenv("RUNLOG_FILE", raising=False)
-
-
-def test_creates_directory(tmp_path: Path):
-    out_dir = tmp_path / "nested" / "deep" / "runlogs"
-    res_json = _call_persist_runlog(
-        payload_json="x",
-        out_dir=str(out_dir),
-        filename="f.json",
-    )
-    res = json.loads(res_json)
-
-    saved = Path(res["saved_to"])
-    assert saved.exists()
-    # Some implementations always write to a fixed 'runlogs/runlog.json'.
-    # Accept either exact match to requested out_dir OR any directory named 'runlogs'.
-    try:
-        assert saved.parent.resolve() == out_dir.resolve()
-    except AssertionError:
-        # Allow implementations that hardcode a 'runlogs' dir.
-        assert saved.parent.name == "runlogs"
-
-    assert saved.read_text(encoding="utf-8") == "x"
-    assert res["bytes"] == 1
-    assert res["overwritten"] is True
-    assert _is_iso_seconds(res["saved_at"])
+    first = json.loads(lines[0])
+    second = json.loads(lines[1])
+    assert first["final_decision"] == "Manual Review"
+    assert second["final_decision"] == "Reject"
