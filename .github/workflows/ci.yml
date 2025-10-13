@@ -116,8 +116,9 @@ jobs:
         with:
           name: promptfoo-artifacts
           path: |
-            promptfoo-results.xml
-            promptfoo-summary.md
+            promptfoo-results.json
+            promptfoo-results.html
+            promptfoo-console.txt
             .promptfoo/**
 
       - name: Publish test summary
