@@ -123,4 +123,4 @@ jobs:
           if [ -f promptfoo-summary.md ]; then
             echo "## Promptfoo Summary" >> $GITHUB_STEP_SUMMARY
             cat promptfoo-summary.md >> $GITHUB_STEP_SUMMARY
-          fi
+          fi 
