@@ -8,6 +8,7 @@ from .tools.watchlist import watchlist_search
 from .router.router import llmrouter
 from .tools.emails_decision import send_decision_email
 from .tools.persist import save_decision_record
+from .models import FinalDecision
 
 
 @CrewBase
@@ -145,23 +146,27 @@ class KYCPipelineCrew:
     @task
     def decision_task(self) -> Task:
         return Task(
-        description=(
-            "Review the following KYC processing results: "
-            "- Extracted Document Data: {extract_task.output} "
-            "- Content Structure Judgment: {judge_task.output} "
-            "- Business Rules Compliance: {bizrules_task.output} "
-            "- Fraud Risk Assessment: {risk_task.output} \n"
-            "Synthesize all this information to make a final decision. "
-            "The decision must be one of: 'Approve', 'Reject', or 'Manual Review'.\n"
-            "Finally, use your tools to: "
-            "1. Send an email notification containing the final decision and a brief, clear explanation. "
-            "2. Persist the complete run log with the final decision and explanation included."
-        ),
-        expected_output=(
-            "A succinct final decision and confirmation that notification and persistence "
-            "have been triggered successfully. If tools were called, mention it."
-        ),
-        agent=self.decision_agent(),
+            description=(
+                "Review the following KYC processing results:\n"
+                "- Extracted Document Data: {extract_task.output}\n"
+                "- Content Structure Judgment: {judge_task.output}\n"
+                "- Business Rules Compliance: {bizrules_task.output}\n"
+                "- Fraud Risk Assessment: {risk_task.output}\n\n"
+                "Synthesize all this information to make a final decision. "
+                "The decision must be one of: 'APPROVE', 'REJECT', or 'HUMAN_REVIEW'. "
+                "Then call your tools exactly once to (1) notify the user and (2) persist the run log. "
+                "Return ONLY a JSON object that conforms to the FinalDecision model—no extra prose."
+            ),
+            expected_output=(
+                # keep this aligned with your repo's contract
+                "JSON FinalDecision: {"
+                '"decision": "APPROVE | REJECT | HUMAN_REVIEW", '
+                '"reasons": ["string"], '
+                '"message": "string"'
+                "}"
+            ),
+            output_pydantic=FinalDecision,   # <-- this enforces the schema
+            agent=self.decision_agent(),
         )
     # ──────────────── Crew ────────────────
     @crew
