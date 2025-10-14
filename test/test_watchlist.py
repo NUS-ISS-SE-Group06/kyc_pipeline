@@ -107,7 +107,7 @@ def _import_watchlist_module():
 def test_bootstrap_and_seed_creates_table_and_rows(temp_db, monkeypatch):
     _install_fake_openai(monkeypatch)
     wl = _import_watchlist_module()
-    out = wl.watchlist_search(name="First Call")
+    out = wl.watchlist_search.run(name="First Call")
     payload = json.loads(out)
     assert Path(os.environ["WATCHLIST_SQLITE_PATH"]).exists()
     conn = sqlite3.connect(os.environ["WATCHLIST_SQLITE_PATH"])
@@ -120,8 +120,8 @@ def test_bootstrap_and_seed_creates_table_and_rows(temp_db, monkeypatch):
 def test_exact_id_match_returns_top_score_1_and_id_exact(temp_db, monkeypatch):
     _install_fake_openai(monkeypatch)
     wl = _import_watchlist_module()
-    wl.watchlist_search(name="seed")
-    out = wl.watchlist_search(id_number="SGP1234567Z")
+    wl.watchlist_search.run(name="seed")
+    out = wl.watchlist_search.run(id_number="SGP1234567Z")
     payload = json.loads(out)
     assert abs(payload["top_score"] - 1.0) < 1e-9
     assert any(m["match_type"] == "ID_EXACT" for m in payload["matches"])
@@ -130,8 +130,8 @@ def test_exact_id_match_returns_top_score_1_and_id_exact(temp_db, monkeypatch):
 def test_vector_search_runs_and_returns_scores(temp_db, monkeypatch):
     _install_fake_openai(monkeypatch, vec=[0.5]*1536)
     wl = _import_watchlist_module()
-    wl.watchlist_search(name="seed")
-    out = wl.watchlist_search(name="Rahul", address="Jurong")
+    wl.watchlist_search.run(name="seed")
+    out = wl.watchlist_search.run(name="Rahul", address="Jurong")
     payload = json.loads(out)
     assert payload["embedding"]["used"] is True
     assert 0.0 <= payload["top_score"] <= 1.0
@@ -141,8 +141,8 @@ def test_router_precedence_when_available(temp_db, monkeypatch):
     _install_fake_router(monkeypatch, style="LLMRouter.embed")
     _install_fake_openai(monkeypatch, vec=[0.1]*1536)
     wl = _import_watchlist_module()
-    wl.watchlist_search(name="seed via router")
-    out = wl.watchlist_search(name="Any Name")
+    wl.watchlist_search.run(name="seed via router")
+    out = wl.watchlist_search.run(name="Any Name")
     payload = json.loads(out)
     # Pass test if provider indicates router (preferred), otherwise fall back is also acceptable
     assert payload["embedding"]["provider"].startswith("router") or payload["embedding"]["provider"] == "openai"
@@ -160,10 +160,10 @@ def test_graceful_when_embedding_fails_text_only(temp_db, monkeypatch):
     monkeypatch.setitem(sys.modules, "openai", fake_module)
     wl = _import_watchlist_module()
     try:
-        wl.watchlist_search(name="seed")
+        wl.watchlist_search.run(name="seed")
     except Exception:
         pytest.skip("Seeding configured to error out on embedding failure; skipping.")
-    out = wl.watchlist_search(name="Rahul")
+    out = wl.watchlist_search.run(name="Rahul")
     payload = json.loads(out)
     assert "matches" in payload
     assert "risk_level" not in payload
