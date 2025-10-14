@@ -33,20 +33,53 @@ def _embed_openai(text: str) -> List[float]:
     return resp.data[0].embedding
 
 def _embed_via_router(text: str) -> Optional[List[float]]:
+    """
+    Try to get an embedding from router.py, supporting multiple router styles:
+      - router.get_embedding(text, model=...)
+      - router.embed(text, model=...)
+      - router.LLMRouter().embed(text, model=...)
+      - router.LLMRouter().embedding(text, model=...)
+      - router.LLMRouter().embeddings(input=..., model=...)
+    Return: list[float] or None if router is unavailable/failed.
+    """
     try:
         import router
-        if hasattr(router, "get_embedding"):
+
+        # 1) module-level helpers
+        if hasattr(router, "get_embedding") and callable(router.get_embedding):
             return router.get_embedding(text=text, model=EMBED_MODEL)
+        if hasattr(router, "embed") and callable(router.embed):
+            return router.embed(text=text, model=EMBED_MODEL)
+
+        # 2) class-based router
         if hasattr(router, "LLMRouter"):
             r = router.LLMRouter()
-            if hasattr(r, "embed"):
-                return r.embed(text=text, model=EMBED_MODEL)
-            if hasattr(r, "embedding"):
-                return r.embedding(text=text, model=EMBED_MODEL)
-        if hasattr(router, "embed"):
-            return router.embed(text=text, model=EMBED_MODEL)
+
+            # common names
+            for attr in ("embed", "embedding"):
+                if hasattr(r, attr) and callable(getattr(r, attr)):
+                    return getattr(r, attr)(text=text, model=EMBED_MODEL)
+
+            # some routers mimic OpenAI-style "embeddings.create"
+            if hasattr(r, "embeddings"):
+                emb_api = getattr(r, "embeddings")
+                # support both callable and object with .create
+                if callable(emb_api):
+                    out = emb_api(input=text, model=EMBED_MODEL)
+                elif hasattr(emb_api, "create") and callable(emb_api.create):
+                    out = emb_api.create(input=text, model=EMBED_MODEL)
+                else:
+                    out = None
+                if out is not None:
+                    # try common shapes: {"data":[{"embedding":[...]}]} or direct list
+                    if isinstance(out, dict) and "data" in out and out["data"]:
+                        maybe = out["data"][0].get("embedding")
+                        if isinstance(maybe, list):
+                            return maybe
+                    if isinstance(out, list) and out and isinstance(out[0], (float, int)):
+                        return list(out)
     except Exception as e:
-        logger.warning("LLMRouter not available or failed: %s", e)
+        logger.warning("LLMRouter embedding failed or not available: %s", e)
     return None
 
 def _embed(text: str) -> EmbeddingResult:
@@ -61,26 +94,6 @@ def _embed(text: str) -> EmbeddingResult:
 def _normalize(s: Optional[str]) -> str:
     return (s or "").strip()
 
-def _cosine(a: List[float], b: List[float]) -> float:
-    if not a or not b or len(a) != len(b):
-        return 0.0
-    num = sum(x*y for x, y in zip(a, b))
-    den = math.sqrt(sum(x*x for x in a)) * math.sqrt(sum(y*y for y in b))
-    if den == 0:
-        return 0.0
-    return num / den
-
-def _risk_from_score(score: float, hard_exact: bool) -> str:
-    if hard_exact:
-        return "HIGH"
-    if score >= HIGH_RISK_SIM:
-        return "HIGH"
-    if score >= MEDIUM_RISK_SIM:
-        return "MEDIUM"
-    if score >= LOW_RISK_SIM:
-        return "LOW"
-    return "NONE"
-
 SQLITE_DDL_ENTITY = """
                     CREATE TABLE IF NOT EXISTS watchlist_entity (
                                                                     entity_id   TEXT PRIMARY KEY,
@@ -91,7 +104,7 @@ SQLITE_DDL_ENTITY = """
                                                                     source      TEXT NOT NULL DEFAULT 'LOCAL',
                                                                     notes       TEXT,
                                                                     embedding   TEXT  -- JSON array
-                    ); \
+                    );
                     """
 
 def _open_sqlite() -> sqlite3.Connection:
@@ -253,7 +266,6 @@ def watchlist_search(
         JSON string with:
           - query: Echo of the inputs.
           - embedding: {provider, model, dims, used}
-          - risk_level: "NONE" | "LOW" | "MEDIUM" | "HIGH"
           - top_score: float similarity (0..1)
           - matches: list of {entity_id, full_name, id_number, source, score, match_type, notes}
           - explanation: reasoning + thresholds + backend info
@@ -286,22 +298,9 @@ def watchlist_search(
         vector_rows = _sqlite_vector(conn, emb_vec)
         matches, top_score, hard_exact = _merge_and_score(exact_rows, loose_rows, vector_rows)
 
-        # Risk
-        if hard_exact:
-            risk = "HIGH"
-        elif top_score >= HIGH_RISK_SIM:
-            risk = "HIGH"
-        elif top_score >= MEDIUM_RISK_SIM:
-            risk = "MEDIUM"
-        elif top_score >= LOW_RISK_SIM:
-            risk = "LOW"
-        else:
-            risk = "NONE"
-
         payload = {
             "query": {"name": name, "id_number": id_number, "address": address, "email": email, "requester_ref": requester_ref},
             "embedding": {"provider": provider, "model": EMBED_MODEL, "dims": EMBED_DIMS, "used": emb_vec is not None},
-            "risk_level": risk,
             "top_score": round(float(top_score), 4),
             "matches": [
                 {
@@ -316,7 +315,7 @@ def watchlist_search(
                 for m in matches
             ],
             "explanation": {
-                "reasoning": "Exact/LIKE checks + Python cosine similarity over JSON-stored embeddings.",
+                "reasoning": "Exact/LIKE checks + Python cosine similarity over JSON-stored embeddings. Risk is computed downstream.",
                 "signals": {
                     "top_score": round(float(top_score), 4),
                     "has_hard_exact": hard_exact,
