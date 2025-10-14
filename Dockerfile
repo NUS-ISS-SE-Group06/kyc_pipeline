@@ -12,13 +12,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="/root/.local/bin:${PATH}"
 
-WORKDIR /build
 
+ENV UV_PYTHON=3.13
+RUN uv python pin 3.13
+
+WORKDIR /build
 COPY pyproject.toml uv.lock ./
-RUN uv sync --all-extras --no-install-project --no-dev
+RUN uv sync --python 3.13 --all-extras --no-install-project --no-dev
 
 COPY . .
-RUN uv sync --all-extras --no-dev
+RUN uv sync --python 3.13 --all-extras --no-dev
 
 # Stage 2: Runtime (smaller final image)
 FROM python:3.12-slim
