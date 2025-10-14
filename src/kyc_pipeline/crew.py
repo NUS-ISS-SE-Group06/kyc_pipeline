@@ -81,21 +81,9 @@ class KYCPipelineCrew:
     @agent
     def decision_agent(self) -> Agent:
         return Agent(
-        role="KYC Decision Maker",
-        goal=(
-            "Collate all KYC checks (document extraction, content validation, "
-            "business rule checks, risk scans) and make a final disposition."
-        ),
-        backstory=(
-            "You are the final decision authority in the KYC pipeline. "
-            "Your primary responsibility is to ensure compliance and accuracy "
-            "while providing clear communication of the outcome."
-        ),
-        allow_delegation=False,
-        llm=llmrouter(),
-        tools=[trigger_decision_email, save_decision_record],
-        verbose=True,
-        max_iter=1,
+            config=self.agents_config['decision_agent'],
+            llm=llmrouter(),
+            tools=[trigger_decision_email, save_decision_record],
         )
 
     # ──────────────── Tasks ────────────────
@@ -132,27 +120,9 @@ class KYCPipelineCrew:
     @task
     def decision_task(self) -> Task:
         return Task(
-            description=(
-                "Review the following KYC processing results:\n"
-                "- Extracted Document Data: {extract_task.output}\n"
-                "- Content Structure Judgment: {judge_task.output}\n"
-                "- Business Rules Compliance: {bizrules_task.output}\n"
-                "- Fraud Risk Assessment: {risk_task.output}\n\n"
-                "Synthesize all this information to make a final decision. "
-                "The decision must be one of: 'APPROVE', 'REJECT', or 'HUMAN_REVIEW'. "
-                "Then call your tools exactly once to (1) notify the user and (2) persist the run log. "
-                "Return ONLY a JSON object that conforms to the FinalDecision model—no extra prose."
-            ),
-            expected_output=(
-                # keep this aligned with your repo's contract
-                "JSON FinalDecision: {"
-                '"decision": "APPROVE | REJECT | HUMAN_REVIEW", '
-                '"reasons": ["string"], '
-                '"message": "string"'
-                "}"
-            ),
-            output_pydantic=FinalDecision,   # <-- this enforces the schema
+            config=self.tasks_config['decision_task'],  # load description/expected_output from YAML
             agent=self.decision_agent(),
+            output_pydantic=FinalDecision,              # enforce schema at runtime
         )
     # ──────────────── Crew ────────────────
     @crew

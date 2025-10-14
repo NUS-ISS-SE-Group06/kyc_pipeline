@@ -114,11 +114,16 @@ decision_task:
     - Business Rules Compliance: {bizrules_task.output}
     - Fraud Risk Assessment: {risk_task.output}
 
-    Synthesize all this information to make a final decision. The decision must be one of: 'Approve', 'Reject', or 'Manual Review'.
+    Synthesize all this information to make a final decision. The decision must be one of:
+    'APPROVE', 'REJECT', or 'HUMAN_REVIEW'.
 
-    Finally, use your tools to:
-    1. Send an email notification containing the final decision and a brief, clear explanation.
-    2. Persist the complete run log with the final decision and explanation included.
+    Finally, call your tools exactly once to:
+    1) Send an email notification containing the final decision and a brief, clear explanation.
+    2) Persist the complete run log with the final decision and explanation included.
   expected_output: >
-    A final confirmation message stating that the notification has been sent and the results have been logged successfully.
-    Example: "Final decision of 'Approve' has been logged and the user has been notified."
+    Return ONLY a JSON object that conforms to the FinalDecision model:
+    {
+      "decision": "APPROVE | REJECT | HUMAN_REVIEW",
+      "reasons": ["string"],
+      "message": "string"
+    }
