@@ -4,7 +4,7 @@ from kyc_pipeline.crew import KYCPipelineCrew
 def run():
     inputs = {
         "doc_id": "KYC-2025-0001",
-        "s3_uri": "<path>/idcard_john_doe.jpg",
+        "s3_uri": "/Users/britta/Documents/workstation/mtech/AgenticAI/kyc_pipeline/test/idcard_john_doe.jpg",
         "doc_type": "KYC",
         "to_email": "applicant@example.com"
     }

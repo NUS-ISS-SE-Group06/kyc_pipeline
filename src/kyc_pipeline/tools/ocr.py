@@ -135,6 +135,20 @@ def validate_ocr_text_safety(text: str) -> str:
     sanitized = sanitized.strip()
     return sanitized
 
+# 🔹 NEW: post-processing to fix OCR misreads
+def normalize_ocr_text(text: str) -> str:
+    """
+    Fix common OCR misreads like $→S, 0→O, |→I, etc.
+    """
+    corrections = {
+        "$": "S",
+        "§": "S",
+        "0": "O",
+        "|": "I",
+    }
+    for wrong, right in corrections.items():
+        text = text.replace(wrong, right)
+    return text
 
 @tool("ocr_extract")
 def ocr_extract(s3_uri: str) -> str:
@@ -176,6 +190,9 @@ def ocr_extract(s3_uri: str) -> str:
     # 4) Safety check + sanitize
     safe_text = validate_ocr_text_safety(raw_text)
 
+    # 🔹 Apply normalization step here
+    normalized_text = normalize_ocr_text(safe_text)
+
     # Optional: minimal success log (Crew tools can print to stderr/stdout)
     logger.info("✅ OCR completed successfully and text sanitized.")
-    return safe_text
+    return normalized_text
