@@ -8,6 +8,12 @@ import importlib
 from pathlib import Path
 import pytest
 
+ROOT = Path(__file__).resolve().parents[1]         # repo root
+SRC = ROOT / "src"
+for p in (str(SRC), str(ROOT)):
+    if p not in sys.path:
+        sys.path.insert(0, p)
+
 class _FakeEmbeddingObj:
     def __init__(self, vec):
         self.embedding = vec
@@ -81,9 +87,22 @@ def temp_db(tmp_path, monkeypatch):
             del sys.modules[mod]
 
 def _import_watchlist_module():
-    import watchlist
-    import importlib
-    return importlib.reload(watchlist)
+    """
+    Try common layouts:
+      - src/kyc_pipeline/tools/watchlist.py  -> kyc_pipeline.tools.watchlist
+      - src/tools/watchlist.py               -> tools.watchlist
+      - fallback:                            -> watchlist
+    """
+    try:
+        import kyc_pipeline.tools.watchlist as watchlist  # type: ignore
+        return importlib.reload(watchlist)
+    except ModuleNotFoundError:
+        try:
+            import tools.watchlist as watchlist           # type: ignore
+            return importlib.reload(watchlist)
+        except ModuleNotFoundError:
+            import watchlist                              # type: ignore
+            return importlib.reload(watchlist)
 
 def test_bootstrap_and_seed_creates_table_and_rows(temp_db, monkeypatch):
     _install_fake_openai(monkeypatch)
