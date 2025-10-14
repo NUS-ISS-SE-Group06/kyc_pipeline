@@ -97,17 +97,13 @@ def temp_db(tmp_path, monkeypatch):
     return db_path
 
 def _import_watchlist():
-    """Import user watchlist from common layouts without external helpers."""
+    import importlib
     try:
-        import kyc_pipeline.tools.watchlist as wl  # src/kyc_pipeline/tools/watchlist.py
+        import tools.watchlist as wl      # src/tools/watchlist.py
         return importlib.reload(wl)
     except ModuleNotFoundError:
-        try:
-            import tools.watchlist as wl            # src/tools/watchlist.py
-            return importlib.reload(wl)
-        except ModuleNotFoundError:
-            import watchlist as wl                  # fallback
-            return importlib.reload(wl)
+        import watchlist as wl            # fallback
+        return importlib.reload(wl)
 
 # -------------------------
 # Tests
