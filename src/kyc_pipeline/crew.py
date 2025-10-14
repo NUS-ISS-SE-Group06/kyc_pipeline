@@ -84,6 +84,7 @@ class KYCPipelineCrew:
             config=self.agents_config['decision_agent'],
             llm=llmrouter(),
             tools=[trigger_decision_email, save_decision_record],
+            max_iter=1
         )
 
     # ──────────────── Tasks ────────────────
