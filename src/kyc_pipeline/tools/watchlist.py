@@ -158,7 +158,13 @@ def _seed_if_empty(conn: sqlite3.Connection, min_rows: int = 20) -> None:
     # Insert with embeddings
     for (full_name, id_number, address, email, notes) in demo:
         eid = str(uuid.uuid4())
-        emb = _embed_openai(_embed_text(full_name, id_number, address, email))
+        
+        try:
+            emb = _embed(_embed_text(full_name, id_number, address, email)).vector
+        except Exception as e:
+            logger.warning("Seeding: embedding failed; inserting without vector: %s", e)
+            emb = None
+
         conn.execute(
             "INSERT OR REPLACE INTO watchlist_entity(entity_id, full_name, id_number, address, email, source, notes, embedding) VALUES (?,?,?,?,?,?,?,?)",
             (eid, full_name, id_number, address, email, "SEED", notes, json.dumps(emb))
@@ -283,10 +289,15 @@ def watchlist_search(
     emb_vec = None
     provider = "openai"
     if embed_text:
-        # Using OpenAI embeddings directly here to avoid repeated imports in the seeding path.
-        from openai import OpenAI
-        client = OpenAI()
-        emb_vec = client.embeddings.create(model=EMBED_MODEL, input=embed_text).data[0].embedding
+        try:
+            # Prefer router if available; fallback to OpenAI
+            res = _embed(embed_text)
+            emb_vec = res.vector
+            provider = res.provider
+        except Exception as e:
+            logger.warning("Embedding failed; continuing with text-only search: %s", e)
+            emb_vec = None
+            provider = "disabled"
 
     conn = _open_sqlite()
     try:
