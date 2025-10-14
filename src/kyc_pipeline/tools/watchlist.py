@@ -34,52 +34,102 @@ def _embed_openai(text: str) -> List[float]:
 
 def _embed_via_router(text: str) -> Optional[List[float]]:
     """
-    Try to get an embedding from router.py, supporting multiple router styles:
+    Try to get an embedding from router in common layouts:
+      - kyc_pipeline.tools.router
+      - kyc_pipeline.router
+      - router  (top-level)
+
+    Supported interfaces:
       - router.get_embedding(text, model=...)
       - router.embed(text, model=...)
       - router.LLMRouter().embed(text, model=...)
       - router.LLMRouter().embedding(text, model=...)
-      - router.LLMRouter().embeddings(input=..., model=...)
-    Return: list[float] or None if router is unavailable/failed.
+      - router.LLMRouter().embeddings(input=..., model=...)  OR  .embeddings.create(input=..., model=...)
+
+    Returns:
+      list[float] on success, or None to allow the caller to fall back to OpenAI.
     """
+    def _as_float_list(x: Any) -> Optional[List[float]]:
+        try:
+            if x is None:
+                return None
+            # If it's a numpy array or has tolist(), use it without importing numpy here.
+            if hasattr(x, "tolist"):
+                x = x.tolist()
+            # Accept any sequence of numbers.
+            if isinstance(x, (list, tuple)) and (len(x) == 0 or isinstance(x[0], (int, float))):
+                return [float(v) for v in x]
+        except Exception:
+            pass
+        return None
+
+    def _load_router():
+        try:
+            from kyc_pipeline.tools import router as r
+            return r
+        except Exception:
+            pass
+        try:
+            from kyc_pipeline import router as r
+            return r
+        except Exception:
+            pass
+        try:
+            import router as r
+            return r
+        except Exception:
+            return None
+
     try:
-        import router
+        rmod = _load_router()
+        if rmod is None:
+            return None
 
-        # 1) module-level helpers
-        if hasattr(router, "get_embedding") and callable(router.get_embedding):
-            return router.get_embedding(text=text, model=EMBED_MODEL)
-        if hasattr(router, "embed") and callable(router.embed):
-            return router.embed(text=text, model=EMBED_MODEL)
+        # 1) Module-level helpers
+        if hasattr(rmod, "get_embedding") and callable(rmod.get_embedding):
+            return _as_float_list(rmod.get_embedding(text=text, model=EMBED_MODEL))
 
-        # 2) class-based router
-        if hasattr(router, "LLMRouter"):
-            r = router.LLMRouter()
+        if hasattr(rmod, "embed") and callable(rmod.embed):
+            return _as_float_list(rmod.embed(text=text, model=EMBED_MODEL))
 
-            # common names
+        # 2) Class-based router
+        if hasattr(rmod, "LLMRouter"):
+            r = rmod.LLMRouter()
+
+            # Common method names
             for attr in ("embed", "embedding"):
                 if hasattr(r, attr) and callable(getattr(r, attr)):
-                    return getattr(r, attr)(text=text, model=EMBED_MODEL)
+                    return _as_float_list(getattr(r, attr)(text=text, model=EMBED_MODEL))
 
-            # some routers mimic OpenAI-style "embeddings.create"
+            # OpenAI-like embeddings surface
             if hasattr(r, "embeddings"):
                 emb_api = getattr(r, "embeddings")
-                # support both callable and object with .create
-                if callable(emb_api):
-                    out = emb_api(input=text, model=EMBED_MODEL)
-                elif hasattr(emb_api, "create") and callable(emb_api.create):
-                    out = emb_api.create(input=text, model=EMBED_MODEL)
-                else:
-                    out = None
+                out = None
+                try:
+                    if callable(emb_api):
+                        # e.g., r.embeddings(input=..., model=...)
+                        out = emb_api(input=text, model=EMBED_MODEL)
+                    elif hasattr(emb_api, "create") and callable(emb_api.create):
+                        # e.g., r.embeddings.create(input=..., model=...)
+                        out = emb_api.create(input=text, model=EMBED_MODEL)
+                except Exception as e:
+                    logger.warning("Router embeddings call failed: %s", e)
+
                 if out is not None:
-                    # try common shapes: {"data":[{"embedding":[...]}]} or direct list
+                    # Shape A: {"data":[{"embedding":[...]}]}
                     if isinstance(out, dict) and "data" in out and out["data"]:
                         maybe = out["data"][0].get("embedding")
-                        if isinstance(maybe, list):
-                            return maybe
-                    if isinstance(out, list) and out and isinstance(out[0], (float, int)):
-                        return list(out)
+                        lst = _as_float_list(maybe)
+                        if lst is not None:
+                            return lst
+                    # Shape B: direct vector list/array
+                    lst = _as_float_list(out)
+                    if lst is not None:
+                        return lst
+
     except Exception as e:
         logger.warning("LLMRouter embedding failed or not available: %s", e)
+
     return None
 
 def _embed(text: str) -> EmbeddingResult:
