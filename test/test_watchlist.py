@@ -1,5 +1,4 @@
 # tests/test_watchlist.py
-
 import os
 import sys
 import json
@@ -9,13 +8,16 @@ from pathlib import Path
 from types import ModuleType
 import pytest
 
-pytestmark = pytest.mark.filterwarnings(
-    "ignore::DeprecationWarning"   # silence noisy deps only within this file
-)
+# Match the other tests: make sure src/ is importable
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "src"
+if str(SRC) not in sys.path:
+    sys.path.insert(0, str(SRC))
 
-# -------------------------
-# Test doubles (stdlib only)
-# -------------------------
+# Keep this test clean even if other deps emit DeprecationWarnings
+pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
+
+# --------------- Test doubles (stdlib only) ---------------
 
 class _FakeEmbeddingObj:
     def __init__(self, vec):
@@ -48,7 +50,7 @@ def _install_fake_openai(monkeypatch, vec=None):
     monkeypatch.setitem(sys.modules, "openai", fake_openai)
 
 def _install_fake_router(monkeypatch, vec=None):
-    """Support router.LLMRouter().embed(...) and .embedding(...), plus module-level embed()."""
+    """Support router.LLMRouter().embed(...)/.embedding(...), and module-level embed()."""
     ret_vec = vec or [0.002 * ((i % 89) + 1) for i in range(1536)]
     fake_router = ModuleType("router")
 
@@ -71,43 +73,38 @@ def _install_fake_router(monkeypatch, vec=None):
 
     monkeypatch.setitem(sys.modules, "router", fake_router)
 
-# -------------------------
-# Pytest fixtures
-# -------------------------
-
-@pytest.fixture(autouse=True)
-def _insert_src_on_path():
-    """Ensure src/ is importable without touching global config."""
-    root = Path(__file__).resolve().parents[1]
-    src = root / "src"
-    if str(src) not in sys.path:
-        sys.path.insert(0, str(src))
-    yield
-    # don't remove to avoid interfering with other tests in same session
+# --------------- Fixtures ---------------
 
 @pytest.fixture
 def temp_db(tmp_path, monkeypatch):
+    # point the tool at an isolated sqlite file
     db_path = tmp_path / "kyc_local.db"
     monkeypatch.setenv("WATCHLIST_SQLITE_PATH", str(db_path))
     monkeypatch.setenv("EMBED_DIMS", "1536")
-    # Clean module cache so env takes effect
-    for name in ("kyc_pipeline.tools.watchlist", "tools.watchlist", "watchlist"):
+    # clear module caches so env + mocks take effect
+    for name in (
+            "kyc_pipeline.tools.watchlist",
+            "kyc_pipeline.tools",
+            "kyc_pipeline",
+            "tools.watchlist",
+            "watchlist",
+            "router",
+            "openai",
+    ):
         if name in sys.modules:
             del sys.modules[name]
+    # ensure packages exist (mirrors how other tests assume package layout)
+    (SRC / "kyc_pipeline").mkdir(parents=True, exist_ok=True)
+    (SRC / "kyc_pipeline" / "__init__.py").touch(exist_ok=True)
+    (SRC / "kyc_pipeline" / "tools").mkdir(parents=True, exist_ok=True)
+    (SRC / "kyc_pipeline" / "tools" / "__init__.py").touch(exist_ok=True)
     return db_path
 
 def _import_watchlist():
-    import importlib
-    try:
-        import tools.watchlist as wl      # src/tools/watchlist.py
-        return importlib.reload(wl)
-    except ModuleNotFoundError:
-        import watchlist as wl            # fallback
-        return importlib.reload(wl)
+    import kyc_pipeline.tools.watchlist as wl
+    return importlib.reload(wl)
 
-# -------------------------
-# Tests
-# -------------------------
+# --------------- Tests ---------------
 
 def test_bootstrap_and_seed_created_and_used_embeddings(temp_db, monkeypatch):
     _install_fake_openai(monkeypatch)
@@ -152,8 +149,8 @@ def test_vector_search_runs_and_scores_range(temp_db, monkeypatch):
     assert isinstance(payload["matches"], list)
 
 def test_prefers_router_when_available(temp_db, monkeypatch):
-    _install_fake_router(monkeypatch)                 # router available
-    _install_fake_openai(monkeypatch, vec=[0.1]*1536) # OpenAI fallback still installed
+    _install_fake_router(monkeypatch)                   # router available
+    _install_fake_openai(monkeypatch, vec=[0.1] * 1536) # OpenAI fallback still installed
     wl = _import_watchlist()
 
     wl.watchlist_search.run(name="seed via router")
