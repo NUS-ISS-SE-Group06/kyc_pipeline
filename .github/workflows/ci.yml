@@ -23,20 +23,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Set up uv and Python
+      - name: Set up Pyhton
+        uses: actions/setup-python@v5
+        with:
+           python-version: ${{ matrix.python-version }}
+
+      - name: Set up uv
         uses: astral-sh/setup-uv@v3
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Cache uv
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: ${{ runner.os }}-uv-${{ matrix.python-version }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-uv-${{ matrix.python-version }}-
+          enable-cache: true
+          cache-dependency-glob: |
+            pyproject.toml
+            uv.lock
+        continue-on-error: true
           
       - name: Install dependencies
         run: uv sync --dev
@@ -57,20 +56,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up uv and Python
+      - name: Set up Pyhton
+        uses: actions/setup-python@v5
+        with:
+           python-version: ${{ matrix.python-version }}
+
+      - name: Set up uv
         uses: astral-sh/setup-uv@v3
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Restore uv cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: ${{ runner.os }}-uv-${{ matrix.python-version }}-${{ hashFiles('uv.lock', 'pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-uv-${{ matrix.python-version }}-
+          enable-cache: true
+          cache-dependency-glob: |
+            pyproject.toml
+            uv.lock
+        continue-on-error: true
 
       - name: Install dependencies
         run: uv sync --dev
@@ -116,8 +114,9 @@ jobs:
         with:
           name: promptfoo-artifacts
           path: |
-            promptfoo-results.xml
-            promptfoo-summary.md
+            promptfoo-results.json
+            promptfoo-results.html
+            promptfoo-console.txt
             .promptfoo/**
 
       - name: Publish test summary
@@ -126,4 +125,4 @@ jobs:
           if [ -f promptfoo-summary.md ]; then
             echo "## Promptfoo Summary" >> $GITHUB_STEP_SUMMARY
             cat promptfoo-summary.md >> $GITHUB_STEP_SUMMARY
-          fi
+          fi 
