@@ -3,7 +3,6 @@ from crewai.project import CrewBase, agent, crew, task
 from .tools.ocr import ocr_extract
 from .tools.bizrules import fetch_business_rules
 from .tools.watchlist import watchlist_search
-#from .tools.notify import send_decision_email
 from .tools.runlog import persist_runlog
 from .router.router import llmrouter
 from .tools.emails_decision import  trigger_decision_email
@@ -84,7 +83,9 @@ class KYCPipelineCrew:
             config=self.agents_config['decision_agent'],
             llm=llmrouter(),
             tools=[trigger_decision_email, save_decision_record],
-            max_iter=1
+              max_iter=3,              # was 1; allow enough steps to call tools
+             allow_delegation=False,  # optional: keeps it deterministic
+             verbose=True,            # helps you see tool-call attempts
         )
 
     # ──────────────── Tasks ────────────────
