@@ -37,7 +37,7 @@ tests:
   - prompt: file://prompts/test_judgeAgent.txt
     vars:
       doc_id: "DOC-002"
-      name: "<NULL>"       
+      name: "<NULL>"
       id_number: "A1234567"
       dob: "1990-11-02"
       confidence_input: "0.6"
