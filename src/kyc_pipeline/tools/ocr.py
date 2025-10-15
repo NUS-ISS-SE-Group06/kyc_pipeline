@@ -2,11 +2,19 @@ import os
 import re
 import tempfile
 from typing import Optional
+import logging
 
 from crewai.tools import tool
 import pytesseract
 from PIL import Image
 import cv2
+
+# Configure global logging format (do this once)
+logging.basicConfig(
+    level=logging.INFO,  # or DEBUG if you want more details
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 # --- Optional MIME helpers (graceful fallbacks) ---
 _magic = None
@@ -127,6 +135,20 @@ def validate_ocr_text_safety(text: str) -> str:
     sanitized = sanitized.strip()
     return sanitized
 
+# 🔹 NEW: post-processing to fix OCR misreads
+def normalize_ocr_text(text: str) -> str:
+    """
+    Fix common OCR misreads like $→S, 0→O, |→I, etc.
+    """
+    corrections = {
+        "$": "S",
+        "§": "S",
+        "0": "O",
+        "|": "I",
+    }
+    for wrong, right in corrections.items():
+        text = text.replace(wrong, right)
+    return text
 
 @tool("ocr_extract")
 def ocr_extract(s3_uri: str) -> str:
@@ -139,16 +161,17 @@ def ocr_extract(s3_uri: str) -> str:
 
     # 1) Existence & size
     if not os.path.exists(image_path):
-        raise FileNotFoundError(f"File not found: {image_path}")
+        logger.error(f"❌ File not found: {image_path}")
 
     file_size_mb = os.path.getsize(image_path) / (1024 * 1024)
     if file_size_mb > MAX_FILE_SIZE_MB:
-        raise ValueError(f"File too large ({file_size_mb:.2f} MB). Limit is {MAX_FILE_SIZE_MB} MB.")
+        logger.warning(f"File too large: {file_size_mb:.2f} MB (limit: {MAX_FILE_SIZE_MB})")
 
     # 2) MIME type
     mime_type = _detect_mime(image_path)
+    logger.debug(f"Detected MIME type: {mime_type}")
     if mime_type not in ALLOWED_MIME_TYPES:
-        raise ValueError(f"Unsupported file type: {mime_type}")
+        logger.error(f"Unsupported file type: {mime_type}")
 
     # 3) Load → preprocess → OCR
     if mime_type == "application/pdf":
@@ -156,13 +179,17 @@ def ocr_extract(s3_uri: str) -> str:
     else:
         img_bgr = cv2.imread(image_path)
         if img_bgr is None:
-            raise ValueError("Unable to read image (possibly corrupted or unsupported).")
+            logger.error("Unable to read image (possibly corrupted or unsupported).")
 
     raw_text = _preprocess_for_ocr(img_bgr)
 
     # 4) Safety check + sanitize
     safe_text = validate_ocr_text_safety(raw_text)
 
-    # Optional: minimal success log (Crew tools can print to stderr/stdout)
-    print("✅ OCR completed successfully and text sanitized.")
-    return safe_text
+    # 🔹 Apply normalization step here
+    normalized_text = normalize_ocr_text(safe_text)
+
+     # Optional: minimal success log (Crew tools can print to stderr/stdout)
+    logger.info("✅ OCR completed successfully and text sanitized.")
+    return normalized_text
+
