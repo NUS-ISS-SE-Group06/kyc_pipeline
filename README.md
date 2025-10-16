@@ -1,6 +1,6 @@
 
 # Agentic KYC Document Processor 
-An event-driven KYC pipeline that starts when a document lands in S3. A ManagerCrew kicks off a sequence of YAML-defined tasks handled by five focused agents: Planner, Extractor,Judge, BizRule, Risk, Notifier
+An event-driven KYC pipeline that starts when a document lands in S3. A ManagerCrew kicks off a sequence of YAML-defined tasks handled by five focused agents: Planner, Extractor,Judge, BizRule, Risk, decision_agent
 
 ## How it runs (end-to-end)
 
@@ -129,7 +129,21 @@ curl http://localhost:8000/ping
 # run crewAI KYC
 curl -X POST http://localhost:8000/run \
   -H "Content-Type: application/json" \
-  -d '{"doc_id":"KYC-1","s3_uri":"s3://bucket/file.jpg","doc_type":"KYC","to_email":"user@example.com"}'
+  -d '{
+        "doc_id":"KYC-1",
+        "s3_uri":"s3://bucket/file.jpg",
+        "doc_type":"KYC",
+        "to_email":"user@example.com"
+      }'
+
+curl -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{
+        "doc_id":"KYC-1",
+        "s3_uri":"./test/idcard_john_doe.jpg",
+        "doc_type":"KYC",
+        "to_email":"user@example.com"
+      }'
 
 # To get KYC Status
 #1. Get all records:
@@ -160,6 +174,23 @@ curl http://localhost:8000/kyc_status?limit=5&offset=5    # Next 5 records
 #8. Complex query:
 curl http://localhost:8000/kyc_status?final_decision=PROCESSED&from_date=2025-09-15&limit=10
 ```
+
+You can run promptfoo tests.
+
+```bash
+rm -rf ~/.promptfoo/cache .promptfoo-cache
+npx promptfoo@latest eval -c ./promptfooconfig.yaml --env-path .env --no-cache --verbose
+
+
+# Display Promptfoo report
+npx promptfoo view
+
+```
+
+## Monitoring
+
+You can display LLM Monitoring dashboard
+  https://app.agentops.ai/overview
 
 ## Docker
 

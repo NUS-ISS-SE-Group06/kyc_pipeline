@@ -8,7 +8,7 @@ planner:
   rules: |
     - Never re-run a completed task unless input changed.
     - Do not use coworker/ask-delegate tools during Extract or Risk.
-    - Stop after Notifier completes.
+    - Stop after decision_agent completes.
 
 extractor:
   role: Extraction Agent

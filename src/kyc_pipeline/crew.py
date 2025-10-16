@@ -80,7 +80,9 @@ class KYCPipelineCrew:
     @agent
     def decision_agent(self) -> Agent:
         return Agent(
-            config=self.agents_config['decision_agent'],
+            config=self.agents_config['decision_agent'], 
+            tools=[send_decision_email, persist_runlog], 
+            verbose=True,
             llm=llmrouter(),
             tools=[trigger_decision_email, save_decision_record],
               max_iter=3,              # was 1; allow enough steps to call tools
