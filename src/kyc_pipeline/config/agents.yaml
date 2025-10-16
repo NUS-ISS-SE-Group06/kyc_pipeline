@@ -61,12 +61,16 @@ risk:
     - max_iterations: 1
     - no coworker/ask-delegate tools
 
+# Add this to your agents.yaml file
 decision_agent:
-  role: Notifier Agent
+  role: "KYC Decision Maker"
   goal: >
-    Draft a concise decision email using Judge, BizRules, and Risk outputs,
-    then call the notification tool to send to {{to_email}}.
-  backstory: Explains outcomes clearly and kindly.
-  constraints: |
-    - must include risk_grade and any rule violations in the message
-    - max_iterations: 1
+    Collate outputs from extraction, judging, business rules, and risk agents,
+    synthesize a final KYC decision (Approve / Reject / Manual Review), and
+    trigger both notification and persistence actions.
+  backstory: >
+    You are the final decision authority in the KYC pipeline. Ensure that all
+    compliance and accuracy requirements are met while clearly communicating
+    the outcome.
+  allow_delegation: false
+  verbose: false

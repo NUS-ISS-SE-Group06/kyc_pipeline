@@ -3,9 +3,11 @@ from crewai.project import CrewBase, agent, crew, task
 from .tools.ocr import ocr_extract
 from .tools.bizrules import fetch_business_rules
 from .tools.watchlist import watchlist_search
-from .tools.notify import send_decision_email
 from .tools.runlog import persist_runlog
 from .router.router import llmrouter
+from .tools.emails_decision import  trigger_decision_email
+from .tools.persist import save_decision_record
+from .models import FinalDecision
 
 
 @CrewBase
@@ -71,14 +73,19 @@ class KYCPipelineCrew:
             max_iter=1
         )
 
+   
+ 
+
+  # Decision Agent
     @agent
     def decision_agent(self) -> Agent:
         return Agent(
             config=self.agents_config['decision_agent'], 
-            tools=[send_decision_email, persist_runlog], 
-            verbose=True,
             llm=llmrouter(),
-            max_iter=1
+            tools=[trigger_decision_email, save_decision_record],
+              max_iter=3,              # was 1; allow enough steps to call tools
+             allow_delegation=False,  # optional: keeps it deterministic
+             verbose=True,            # helps you see tool-call attempts
         )
 
     # ──────────────── Tasks ────────────────
@@ -111,13 +118,14 @@ class KYCPipelineCrew:
             agent=self.risk(), 
         )
 
+    
     @task
     def decision_task(self) -> Task:
         return Task(
-            config=self.tasks_config['decision_task'], 
-            agent=self.decision_agent(), 
+            config=self.tasks_config['decision_task'],  # load description/expected_output from YAML
+            agent=self.decision_agent(),
+            output_pydantic=FinalDecision,              # enforce schema at runtime
         )
-
     # ──────────────── Crew ────────────────
     @crew
     def crew(self) -> Crew:
