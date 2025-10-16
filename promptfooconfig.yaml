@@ -268,6 +268,43 @@ tests:
                  typeof parsed.has_hard_exact === 'boolean' &&
                  ["PROCEED","REVIEW","BLOCK"].includes(parsed.decision);
 
+  - description: "Watchlist: All empty strings (empty context) → call tool & JSON exists"
+    vars:
+      prompt: file://prompts/test_watchlistAgent.txt
+      name: ""
+      id_number: ""
+      address: ""
+      email: ""
+      requester_ref: ""
+      tool_output: ""
+    assert:
+      - type: contains
+        value: "watchlist_search("
+      - type: javascript
+        value: |
+          const lines = output.split('\n');
+          const jsonLine = lines.find(l => l.trim().startsWith('{'));
+          if (!jsonLine) return false;
+          const parsed = JSON.parse(jsonLine);
+          return typeof parsed.top_score === 'number' &&
+                 typeof parsed.has_hard_exact === 'boolean' &&
+                 ["PROCEED","REVIEW","BLOCK"].includes(parsed.decision);
+
+  - description: "Watchlist: Provided tool_output → JSON only, no tool call"
+    vars:
+      prompt: file://prompts/test_watchlistAgent.txt
+      name: "Global Remit Co."
+      id_number: "UEN201912345A"
+      address: "Singapore"
+      email: "ops@globalremit.example"
+      requester_ref: "case-777"
+      tool_output: |
+        {"query":{"name":"Global Remit Co.","id_number":"UEN201912345A","address":"Singapore","email":"ops@globalremit.example","requester_ref":"case-777"},"top_score":0.76,"has_hard_exact":false,"decision":"REVIEW","rationale":"threshold"}
+    assert:
+      - type: not-contains
+        value: "watchlist_search("
+      - type: is-json
+
 ci:
   threshold: 85
   maxConcurrency: 10
