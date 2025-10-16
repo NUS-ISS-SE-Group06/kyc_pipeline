@@ -92,15 +92,35 @@ def test_env_overrides(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.delenv("RUNLOG_FILE", raising=False)
 
 
-def test_creates_directory(tmp_path: Path):
+def test_creates_directory(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Persist should create nested directory and write the file at the requested path.
+
+    We clear RUNLOG_* env vars so they don't override the explicit out_dir/filename.
+    """
+    # Ensure test isn't affected by .env or shell exports
+    monkeypatch.delenv("RUNLOG_DIR", raising=False)
+    monkeypatch.delenv("RUNLOG_FILE", raising=False)
+
+    payload = "x"
     out_dir = tmp_path / "nested" / "deep" / "runlogs"
-    res_json = _call_persist_runlog(payload_json="x", out_dir=str(out_dir), filename="f.json")
+    filename = "f.json"
+
+    res_json = _call_persist_runlog(
+        payload_json=payload,
+        out_dir=str(out_dir),
+        filename=filename,
+    )
     res = json.loads(res_json)
 
     saved = Path(res["saved_to"])
-    assert saved.exists()
-    assert saved.parent == out_dir
-    assert saved.read_text(encoding="utf-8") == "x"
-    assert res["bytes"] == 1
+    assert saved.exists(), f"Expected file to exist: {saved}"
+    assert saved.parent == out_dir, f"Expected parent {out_dir}, got {saved.parent}"
+    assert saved.name == filename, f"Expected filename {filename}, got {saved.name}"
+
+    contents = saved.read_text(encoding="utf-8")
+    assert contents == payload, f"Expected contents '{payload}', got '{contents}'"
+
+    # Metadata checks
+    assert res["bytes"] == len(payload), f"Expected {len(payload)} bytes, got {res['bytes']}"
     assert res["overwritten"] is True
-    assert _is_iso_seconds(res["saved_at"])
+    assert _is_iso_seconds(res["saved_at"]), f"saved_at not ISO seconds: {res['saved_at']}"
