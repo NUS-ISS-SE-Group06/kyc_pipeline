@@ -191,6 +191,41 @@ tests:
           const json = JSON.parse(output.trim());
           return json.top_score === 0.95 && json.has_hard_exact === false && json.decision === "BLOCK";
 
+  - description: "Watchlist: Medium score 0.80 → REVIEW"
+    vars:
+      prompt: file://prompts/test_watchlistAgent.txt
+      name: "Maria Santos"
+      id_number: "PHL1122334M"
+      address: ""
+      email: ""
+      requester_ref: ""
+      tool_output: |
+        {"query":{"name":"Maria Santos","id_number":"PHL1122334M","address":"","email":"","requester_ref":""},"top_score":0.80,"has_hard_exact":false,"decision":"PROCEED","rationale":"sample"}
+    assert:
+      - type: not-contains
+        value: "watchlist_search("
+      - type: javascript
+        value: |
+          const json = JSON.parse(output.trim());
+          return json.top_score === 0.80 && json.has_hard_exact === false && json.decision === "REVIEW";
+
+  - description: "Watchlist: Low score 0.10 → PROCEED"
+    vars:
+      prompt: file://prompts/test_watchlistAgent.txt
+      name: "Hiro Tanaka"
+      id_number: "JPN2211334G"
+      address: ""
+      email: ""
+      requester_ref: ""
+      tool_output: |
+        {"query":{"name":"Hiro Tanaka","id_number":"JPN2211334G","address":"","email":"","requester_ref":""},"top_score":0.10,"has_hard_exact":false,"decision":"BLOCK","rationale":"sample"}
+    assert:
+      - type: not-contains
+        value: "watchlist_search("
+      - type: javascript
+        value: |
+          const json = JSON.parse(output.trim());
+          return json.top_score === 0.10 && json.has_hard_exact === false && json.decision === "PROCEED";
 
 ci:
   threshold: 85
