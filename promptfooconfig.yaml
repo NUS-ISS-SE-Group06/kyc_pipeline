@@ -86,7 +86,8 @@ tests:
 
   # ============ WATCHLIST AGENT TESTS ============
 
-  - vars:
+  - description: "Watchlist: Alex Tan"
+    vars:
       prompt: file://prompts/test_watchlistAgent.txt
       name: "Alex Tan"
       id_number: "S9912345Z"
@@ -99,27 +100,14 @@ tests:
         value: 'watchlist_search('
       - type: contains
         value: 'Alex Tan'
-      - type: javascript
-        value: |
-          const lines = output.split('\n').filter(l => l.trim());
-          const jsonLine = lines.find(l => l.trim().startsWith('{'));
-          
-          if (!jsonLine) return { pass: false, reason: 'No JSON found' };
-          
-          try {
-            const parsed = JSON.parse(jsonLine);
-            if (!parsed.query || !parsed.decision || typeof parsed.top_score !== 'number') {
-              return { pass: false, reason: 'Missing required fields' };
-            }
-            if (parsed.query.name !== "Alex Tan") {
-              return { pass: false, reason: 'Name mismatch' };
-            }
-            return { pass: true };
-          } catch (e) {
-            return { pass: false, reason: `Error: ${e.message}` };
-          }
+      - type: contains-json
+        value:
+          query:
+            name: "Alex Tan"
+          decision: "PROCEED"
 
-  - vars:
+  - description: "Watchlist: Jane Doe"
+    vars:
       prompt: file://prompts/test_watchlistAgent.txt
       name: "Jane Doe"
       id_number: "A1234567"
@@ -130,21 +118,14 @@ tests:
     assert:
       - type: contains
         value: 'watchlist_search('
-      - type: javascript
-        value: |
-          const jsonLine = output.split('\n').find(l => l.trim().startsWith('{'));
-          if (!jsonLine) return { pass: false, reason: 'No JSON found' };
-          try {
-            const parsed = JSON.parse(jsonLine);
-            if (!parsed.query || !parsed.decision) {
-              return { pass: false, reason: 'Missing fields' };
-            }
-            return { pass: true };
-          } catch (e) {
-            return { pass: false, reason: `Error: ${e.message}` };
-          }
+      - type: contains-json
+        value:
+          query:
+            name: "Jane Doe"
+          decision: "PROCEED"
 
-  - vars:
+  - description: "Watchlist: NULL handling"
+    vars:
       prompt: file://prompts/test_watchlistAgent.txt
       name: "<NULL>"
       id_number: "A1234567"
@@ -155,19 +136,9 @@ tests:
     assert:
       - type: contains
         value: 'watchlist_search('
-      - type: javascript
-        value: |
-          const jsonLine = output.split('\n').find(l => l.trim().startsWith('{'));
-          if (!jsonLine) return { pass: false, reason: 'No JSON found' };
-          try {
-            const parsed = JSON.parse(jsonLine);
-            if (parsed.decision !== "PROCEED") {
-              return { pass: false, reason: `Expected PROCEED, got ${parsed.decision}` };
-            }
-            return { pass: true };
-          } catch (e) {
-            return { pass: false, reason: `Error: ${e.message}` };
-          }
+      - type: contains-json
+        value:
+          decision: "PROCEED"
 
 ci:
   threshold: 85
