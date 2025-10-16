@@ -1,3 +1,5 @@
+import os
+import agentops
 from datetime import datetime
 from kyc_pipeline.crew import KYCPipelineCrew
 
