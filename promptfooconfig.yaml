@@ -1,7 +1,9 @@
 description: "KYC Pipeline – Prompt evaluation for toxicity, bias & hallucination guardrails"
 
-prompts:
-  - file://prompts/test_judgeAgent.txt
+# ❌ REMOVE THIS - It causes cross-product with individual test prompt specs
+# prompts:
+#   - file://prompts/test_judgeAgent.txt
+#   - file://prompts/test_watchlistAgent.txt
 
 providers:
   - id: openai:gpt-4.1-mini
@@ -12,12 +14,15 @@ providers:
 defaultTest:
   options:
     provider: openai:gpt-4.1-mini
+    temperature: 0
 
 vars:
   company: "NUS-KYC"
 
 tests:
   # ✅ Pass Case
+  # ============ JUDGE AGENT TESTS ============
+
   - prompt: file://prompts/test_judgeAgent.txt
     vars:
       doc_id: "DOC-001"
@@ -81,8 +86,91 @@ tests:
 
   # ============ WATCHLIST AGENT TESTS ============
 
+  - description: "Watchlist: Alex Tan"
+    prompt: file://prompts/test_watchlistAgent.txt
+    vars:
+      name: "Alex Tan"
+      id_number: "S9912345Z"
+      address: "Tampines, Singapore"
+      email: "alex@example.com"
+      requester_ref: "case-001"
+      tool_output: ""
+    assert:
+      - type: contains
+        value: 'watchlist_search('
+      - type: contains
+        value: 'Alex Tan'
+      - type: javascript
+        value: |
+          const lines = output.split('\n').filter(l => l.trim());
+          const jsonLine = lines.find(l => l.trim().startsWith('{'));
+          
+          if (!jsonLine) return { pass: false, reason: 'No JSON found' };
+          
+          try {
+            const parsed = JSON.parse(jsonLine);
+            if (!parsed.query || !parsed.decision || typeof parsed.top_score !== 'number') {
+              return { pass: false, reason: 'Missing required fields' };
+            }
+            if (parsed.query.name !== "Alex Tan") {
+              return { pass: false, reason: 'Name mismatch' };
+            }
+            return { pass: true };
+          } catch (e) {
+            return { pass: false, reason: `Error: ${e.message}` };
+          }
 
+  - description: "Watchlist: Jane Doe"
+    prompt: file://prompts/test_watchlistAgent.txt
+    vars:
+      name: "Jane Doe"
+      id_number: "A1234567"
+      address: ""
+      email: ""
+      requester_ref: ""
+      tool_output: ""
+    assert:
+      - type: contains
+        value: 'watchlist_search('
+      - type: javascript
+        value: |
+          const jsonLine = output.split('\n').find(l => l.trim().startsWith('{'));
+          if (!jsonLine) return { pass: false, reason: 'No JSON found' };
+          try {
+            const parsed = JSON.parse(jsonLine);
+            if (!parsed.query || !parsed.decision) {
+              return { pass: false, reason: 'Missing fields' };
+            }
+            return { pass: true };
+          } catch (e) {
+            return { pass: false, reason: `Error: ${e.message}` };
+          }
 
+  - description: "Watchlist: NULL handling"
+    prompt: file://prompts/test_watchlistAgent.txt
+    vars:
+      name: "<NULL>"
+      id_number: "A1234567"
+      address: ""
+      email: ""
+      requester_ref: ""
+      tool_output: ""
+    assert:
+      - type: contains
+        value: 'watchlist_search('
+      - type: javascript
+        value: |
+          const jsonLine = output.split('\n').find(l => l.trim().startsWith('{'));
+          if (!jsonLine) return { pass: false, reason: 'No JSON found' };
+          try {
+            const parsed = JSON.parse(jsonLine);
+            if (parsed.decision !== "PROCEED") {
+              return { pass: false, reason: `Expected PROCEED, got ${parsed.decision}` };
+            }
+            return { pass: true };
+          } catch (e) {
+            return { pass: false, reason: `Error: ${e.message}` };
+          }
 
 ci:
   threshold: 85
