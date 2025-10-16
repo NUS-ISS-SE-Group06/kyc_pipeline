@@ -129,7 +129,21 @@ curl http://localhost:8000/ping
 # run crewAI KYC
 curl -X POST http://localhost:8000/run \
   -H "Content-Type: application/json" \
-  -d '{"doc_id":"KYC-1","s3_uri":"s3://bucket/file.jpg","doc_type":"KYC","to_email":"user@example.com"}'
+  -d '{
+        "doc_id":"KYC-1",
+        "s3_uri":"s3://bucket/file.jpg",
+        "doc_type":"KYC",
+        "to_email":"user@example.com"
+      }'
+
+curl -X POST http://localhost:8000/run \
+  -H "Content-Type: application/json" \
+  -d '{
+        "doc_id":"KYC-1",
+        "s3_uri":"./test/idcard_john_doe.jpg",
+        "doc_type":"KYC",
+        "to_email":"user@example.com"
+      }'
 
 # To get KYC Status
 #1. Get all records:
