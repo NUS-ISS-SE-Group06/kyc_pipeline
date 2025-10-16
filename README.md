@@ -175,6 +175,23 @@ curl http://localhost:8000/kyc_status?limit=5&offset=5    # Next 5 records
 curl http://localhost:8000/kyc_status?final_decision=PROCESSED&from_date=2025-09-15&limit=10
 ```
 
+You can run promptfoo tests.
+
+```bash
+rm -rf ~/.promptfoo/cache .promptfoo-cache
+npx promptfoo@latest eval -c ./promptfooconfig.yaml --env-path .env --no-cache --verbose
+
+
+# Display Promptfoo report
+npx promptfoo view
+
+```
+
+## Monitoring
+
+You can display LLM Monitoring dashboard
+  https://app.agentops.ai/overview
+
 ## Docker
 
 You can run it on `docker`.
