@@ -1,6 +1,6 @@
 
 # Agentic KYC Document Processor 
-An event-driven KYC pipeline that starts when a document lands in S3. A ManagerCrew kicks off a sequence of YAML-defined tasks handled by five focused agents: Planner, Extractor,Judge, BizRule, Risk, Notifier
+An event-driven KYC pipeline that starts when a document lands in S3. A ManagerCrew kicks off a sequence of YAML-defined tasks handled by five focused agents: Planner, Extractor,Judge, BizRule, Risk, decision_agent
 
 ## How it runs (end-to-end)
 
