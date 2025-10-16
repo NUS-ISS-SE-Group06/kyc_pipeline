@@ -3,6 +3,8 @@ import agentops
 from datetime import datetime
 from kyc_pipeline.crew import KYCPipelineCrew
 
+agentops.init(os.getenv("AGENTOPS_API_KEY"))
+
 def run():
     inputs = {
         "doc_id": "KYC-2025-0001",
