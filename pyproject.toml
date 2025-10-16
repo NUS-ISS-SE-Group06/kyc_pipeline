@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "KYC Pipeline using crewAI"
 requires-python = ">=3.13,<3.14"
 dependencies = [
+    "agentops>=0.4.21",
     "crewai[tools]>=0.186.1,<1.0.0",
     "fastapi>=0.118.0",
     "filetype>=1.2.0",
