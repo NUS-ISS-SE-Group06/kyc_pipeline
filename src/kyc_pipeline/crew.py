@@ -73,9 +73,9 @@ class KYCPipelineCrew:
         )
 
     @agent
-    def notifier(self) -> Agent:
+    def decision_agent(self) -> Agent:
         return Agent(
-            config=self.agents_config['notifier'], 
+            config=self.agents_config['decision_agent'], 
             tools=[send_decision_email, persist_runlog], 
             verbose=True,
             llm=llmrouter(),
@@ -113,10 +113,10 @@ class KYCPipelineCrew:
         )
 
     @task
-    def notify_task(self) -> Task:
+    def decision_task(self) -> Task:
         return Task(
-            config=self.tasks_config['notify_task'], 
-            agent=self.notifier(), 
+            config=self.tasks_config['decision_task'], 
+            agent=self.decision_agent(), 
         )
 
     # ──────────────── Crew ────────────────
@@ -128,14 +128,14 @@ class KYCPipelineCrew:
                 self.judge(),
                 self.bizrules(),
                 self.risk(),
-                self.notifier(),
+                self.decision_agent(),
             ],
             tasks=[
                 self.extract_task(),
                 self.judge_task(),
                 self.bizrules_task(),
                 self.risk_task(),
-                self.notify_task(),
+                self.decision_task(),
             ],
             process=Process.hierarchical,   # manager-led agentic flow
             manager_agent=self.planner(),

@@ -1,7 +1,15 @@
+import os
+import agentops
 from datetime import datetime
 from kyc_pipeline.crew import KYCPipelineCrew
 
+agentops.init(os.getenv("AGENTOPS_API_KEY"))
+
 def run():
+    """     
+    Run the crew.     
+    """
+
     inputs = {
         "doc_id": "KYC-2025-0001",
         "s3_uri": "<path>/idcard_john_doe.jpg",
@@ -10,6 +18,6 @@ def run():
     }
 
     try:
-        result = KYCPipelineCrew().crew().kickoff(inputs=inputs)
+        KYCPipelineCrew().crew().kickoff(inputs=inputs)
     except Exception as e:
         raise Exception(f"An error occurred while running the crew: {e}")
