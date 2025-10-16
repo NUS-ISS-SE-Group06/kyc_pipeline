@@ -4,7 +4,7 @@ plan_task:
     Identify the sequence of tasks and any rework triggers (e.g., low confidence).
   expected_output: |
     JSON: {
-      "route": ["extract_task","bizrules_task","judge_task","risk_task","notify_task"],
+      "route": ["extract_task","bizrules_task","judge_task","risk_task","decision_task"],
       "notes": "string"
     }
 
@@ -105,7 +105,7 @@ risk_task:
       "matches": [{"name": "string", "score": float}][]
     }
 
-notify_task:
+decision_task:
   description: >
     Draft a final decision message to {to_email} with reasons and next steps, then send via notifier tool.
     Call this service exactly once.
