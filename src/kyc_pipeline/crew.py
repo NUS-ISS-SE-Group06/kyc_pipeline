@@ -112,9 +112,9 @@ class KYCPipelineCrew:
         )
 
     @task
-    def notify_task(self) -> Task:
+    def decision_task(self) -> Task:
         return Task(
-            config=self.tasks_config['notify_task'], 
+            config=self.tasks_config['decision_task'], 
             agent=self.notifier(), 
         )
 
@@ -134,7 +134,7 @@ class KYCPipelineCrew:
                 self.judge_task(),
                 self.bizrules_task(),
                 self.risk_task(),
-                self.notify_task(),
+                self.decision_task(),
             ],
             process=Process.hierarchical,   # manager-led agentic flow
             manager_agent=self.planner(),
