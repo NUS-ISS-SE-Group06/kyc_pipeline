@@ -100,11 +100,15 @@ tests:
         value: 'watchlist_search('
       - type: contains
         value: 'Alex Tan'
-      - type: contains-json
-        value:
-          query:
-            name: "Alex Tan"
-          decision: "PROCEED"
+      - type: javascript
+        value: |
+          const lines = output.split('\n');
+          const jsonLine = lines.find(l => l.trim().startsWith('{'));
+          if (!jsonLine) return false;
+          const parsed = JSON.parse(jsonLine);
+          return parsed.query?.name === "Alex Tan" && 
+                 parsed.decision === "PROCEED" && 
+                 typeof parsed.top_score === 'number';
 
   - description: "Watchlist: Jane Doe"
     vars:
@@ -118,11 +122,14 @@ tests:
     assert:
       - type: contains
         value: 'watchlist_search('
-      - type: contains-json
-        value:
-          query:
-            name: "Jane Doe"
-          decision: "PROCEED"
+      - type: javascript
+        value: |
+          const lines = output.split('\n');
+          const jsonLine = lines.find(l => l.trim().startsWith('{'));
+          if (!jsonLine) return false;
+          const parsed = JSON.parse(jsonLine);
+          return parsed.query?.name === "Jane Doe" && 
+                 parsed.decision === "PROCEED";
 
   - description: "Watchlist: NULL handling"
     vars:
@@ -136,9 +143,13 @@ tests:
     assert:
       - type: contains
         value: 'watchlist_search('
-      - type: contains-json
-        value:
-          decision: "PROCEED"
+      - type: javascript
+        value: |
+          const lines = output.split('\n');
+          const jsonLine = lines.find(l => l.trim().startsWith('{'));
+          if (!jsonLine) return false;
+          const parsed = JSON.parse(jsonLine);
+          return parsed.decision === "PROCEED";
 
 ci:
   threshold: 85
