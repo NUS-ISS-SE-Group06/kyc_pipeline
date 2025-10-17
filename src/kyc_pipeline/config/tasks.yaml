@@ -105,13 +105,25 @@ risk_task:
       "matches": [{"name": "string", "score": float}][]
     }
 
+# Add this to your tasks.yaml file
 decision_task:
   description: >
-    Draft a final decision message to {to_email} with reasons and next steps, then send via notifier tool.
-    Call this service exactly once.
-  expected_output: |
-    JSON FinalDecision: {
-      "decision": "APPROVE"|"REJECT"|"HUMAN_REVIEW",
-      "reasons": ["string", ...],
+    Review the following KYC processing results:
+    - Extracted Document Data: {extract_task.output}
+    - Content Structure Judgment: {judge_task.output}
+    - Business Rules Compliance: {bizrules_task.output}
+    - Fraud Risk Assessment: {risk_task.output}
+
+    Synthesize all this information to make a final decision. The decision must be one of:
+    'APPROVE', 'REJECT', or 'HUMAN_REVIEW'.
+
+    Finally, call your tools exactly once to:
+    1) Send an email notification containing the final decision and a brief, clear explanation.
+    2) Persist the complete run log with the final decision and explanation included.
+  expected_output: >
+    Return ONLY a JSON object that conforms to the FinalDecision model:
+    {
+      "decision": "APPROVE | REJECT | HUMAN_REVIEW",
+      "reasons": ["string"],
       "message": "string"
     }
