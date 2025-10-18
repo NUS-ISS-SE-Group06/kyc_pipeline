@@ -302,11 +302,11 @@ def _merge_and_score(exact_rows, loose_rows, vector_rows):
 
 @tool("watchlist_search")
 def watchlist_search(
-        name: str = "",
-        id_number: str = "",
-        address: str = "",
-        email: str = "",
-        requester_ref: str = ""
+        name: Optional[str] = None,
+        id_number: Optional[str] = None,
+        address: Optional[str] = None,
+        email: Optional[str] = None,
+        requester_ref: Optional[str] = None
 ) -> str:
     """
     FraudCheck/Watchlist lookup (SQLite-only).
@@ -332,10 +332,18 @@ def watchlist_search(
         - Matching strategy: exact ID -> exact NAME -> LIKE NAME -> vector cosine over JSON embeddings.
         - No audit writes (POC mode).
     """
+    # Normalize None -> "" early so everything downstream is consistent
+    name = _normalize(name)
+    id_number = _normalize(id_number)
+    address = _normalize(address)
+    email = _normalize(email)
+    requester_ref = _normalize(requester_ref)
+
     ts = time.strftime("%Y-%m-%d %H:%M:%S")
     logger.info("[%s] watchlist_search name=%r id=%r db=%s", ts, name, id_number, DB_PATH)
 
-    embed_text = " | ".join([s for s in [name, id_number, address, email] if s]).strip()
+    # Build the embedding text from normalized fields
+    embed_text = " | ".join([s for s in (name, id_number, address, email) if s]).strip()
     emb_vec = None
     provider = "openai"
     if embed_text:
@@ -355,12 +363,18 @@ def watchlist_search(
         _seed_if_empty(conn, min_rows=20)
 
         # Search paths
-        exact_rows, loose_rows = _sqlite_exact_like(conn, _normalize(name), _normalize(id_number))
+        exact_rows, loose_rows = _sqlite_exact_like(conn, name, id_number)
         vector_rows = _sqlite_vector(conn, emb_vec)
         matches, top_score, hard_exact = _merge_and_score(exact_rows, loose_rows, vector_rows)
 
         payload = {
-            "query": {"name": name, "id_number": id_number, "address": address, "email": email, "requester_ref": requester_ref},
+            "query": {
+                "name": name,
+                "id_number": id_number,
+                "address": address,
+                "email": email,
+                "requester_ref": requester_ref
+            },
             "embedding": {"provider": provider, "model": EMBED_MODEL, "dims": EMBED_DIMS, "used": emb_vec is not None},
             "top_score": round(float(top_score), 4),
             "matches": [
