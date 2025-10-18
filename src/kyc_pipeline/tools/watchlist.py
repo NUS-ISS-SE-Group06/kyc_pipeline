@@ -404,3 +404,17 @@ def watchlist_search(
     finally:
         conn.close()
 
+# --- Pydantic forward-ref fix for CrewAI tool schema ---
+try:
+    # pass a namespace that defines Optional so "ForwardRef('Optional[str]')" can be resolved
+    from typing import Optional as _Optional
+    watchlist_search.model_rebuild(
+        force=True,
+        _types_namespace=(globals() | {'Optional': _Optional, 'str': str})
+    )
+except Exception as _e:
+    # keep it quiet in prod; DEBUG if you want to see it
+    try:
+        logger.debug("watchlist_search.model_rebuild skipped: %s", _e)
+    except Exception:
+        pass
