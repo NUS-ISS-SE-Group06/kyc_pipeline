@@ -25,7 +25,7 @@ def llmrouter(model_name: str = "gpt-5-nano", temperature: float = 0.05) -> LLM:
         - If any error occurs, fall back to gpt-4.1-mini"
     """
     
-    model_name="gpt-4.1-mini"
+    #model_name="gpt-4.1-mini" #default to gpt-5-nano
     fallback_model_name="gpt-4o-mini"
     try:
         # Default: Openai GPT
