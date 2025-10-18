@@ -1,11 +1,10 @@
 
 # src/kyc_pipeline/tools/persist.py
-import json
-import os
+import json, tempfile, os
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, List, Union
+from typing import Any, Dict, Optional, List, Union
 from crewai.tools import tool
 
 # ---------- helpers ----------
@@ -221,11 +220,12 @@ def save_decision_record(
         "audit_log": audit_log_list,
     }
 
-    kyc_status_file = os.getenv("KYC_STATUS_FILE")  # e.g., "data/kyc_status.json" (JSONL)
+    # AFTER (always JSONL when KYC_STATUS_FILE is set)
+    kyc_status_file = os.getenv("KYC_STATUS_FILE")
     if kyc_status_file:
-        audit_file = _append_jsonl_to_file(Path(kyc_status_file), audit_payload)
+        fpath = Path(kyc_status_file)
+        audit_file = _append_jsonl_to_file(fpath, audit_payload)
     else:
-        # fallback to dir mode (decisions.jsonl under this dir)
         audit_dir = Path(os.getenv("DECISIONS_AUDIT_DIR", "runlogs"))
         audit_file = _append_jsonl_in_dir(audit_dir, audit_payload)
 
@@ -239,3 +239,61 @@ def save_decision_record(
 
 # ensure pydantic model is fully built for some CrewAI wrappers
 save_decision_record.model_rebuild()
+
+def _atomic_write_text(dest: Path, text: str) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=str(dest.parent), delete=False) as tmp:
+        tmp.write(text)
+        tmp.flush()
+        os.fsync(tmp.fileno())
+        tmp_path = Path(tmp.name)
+    tmp_path.replace(dest)
+
+def _append_to_json_array_file(file_path: Path, payload: Dict[str, Any]) -> Path:
+    """
+    Append (or repair then append) to a JSON **array file** safely and atomically.
+    If the file is missing, creates: [<payload>].
+    If the file was corrupted by JSONL appends, it salvages the array and
+    pulls valid trailing objects into the array.
+    """
+    arr: List[Dict[str, Any]] = []
+    if file_path.exists():
+        raw = file_path.read_text(encoding="utf-8").strip()
+        # Fast path: valid array
+        try:
+            maybe = json.loads(raw)
+            if isinstance(maybe, list):
+                arr = maybe
+            elif isinstance(maybe, dict):
+                arr = [maybe]
+        except Exception:
+            # Repair path: look for last closing bracket of an array
+            end_idx = raw.rfind("]")
+            if end_idx != -1:
+                head = raw[: end_idx + 1]
+                tail = raw[end_idx + 1 :].strip()
+                try:
+                    base = json.loads(head)
+                    if isinstance(base, list):
+                        arr = base
+                except Exception:
+                    arr = []
+                # Try to parse any trailing JSONL-ish objects
+                for line in tail.splitlines():
+                    line = line.strip().rstrip(",")
+                    if not line:
+                        continue
+                    try:
+                        obj = json.loads(line)
+                        if isinstance(obj, dict):
+                            arr.append(obj)
+                    except Exception:
+                        # ignore junk
+                        pass
+            else:
+                # could not repair, start fresh
+                arr = []
+    # Append the new record and write atomically
+    arr.append(payload)
+    _atomic_write_text(file_path, json.dumps(arr, ensure_ascii=False, indent=2))
+    return file_path
