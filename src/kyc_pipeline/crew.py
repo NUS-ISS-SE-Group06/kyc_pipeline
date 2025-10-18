@@ -132,15 +132,15 @@ class KYCPipelineCrew:
         return Crew(
             agents=[
                 self.extractor(),
-                self.judge(),
                 self.bizrules(),
+                self.judge(),
                 self.risk(),
                 self.decision_agent(),
             ],
             tasks=[
                 self.extract_task(),
-                self.judge_task(),
                 self.bizrules_task(),
+                self.judge_task(),
                 self.risk_task(),
                 self.decision_task(),
             ],
