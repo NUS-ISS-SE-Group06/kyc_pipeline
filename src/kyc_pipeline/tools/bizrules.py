@@ -18,6 +18,6 @@ def fetch_business_rules(doc_type: str) -> str:
               "require_address": "true",
               "address_min_len": 10,
               "address_min_words": 2,
-              "address_allow_regex": "",  
+              "address_allow_regex": "",
             }
     return json.dumps(data)
