@@ -208,7 +208,7 @@ def _seed_if_empty(conn: sqlite3.Connection, min_rows: int = 20) -> None:
     # Insert with embeddings
     for (full_name, id_number, address, email, notes) in demo:
         eid = str(uuid.uuid4())
-        
+
         try:
             emb = _embed(_embed_text(full_name, id_number, address, email)).vector
         except Exception as e:
@@ -228,14 +228,14 @@ def _sqlite_exact_like(conn, name_q: str, id_q: str):
         cur.execute("""
                     SELECT entity_id, full_name, id_number, source, notes, 1.0 AS score, 'ID_EXACT' AS match_type
                     FROM watchlist_entity WHERE LOWER(id_number)=LOWER(?)
-                        LIMIT 10;
+                    LIMIT 10;
                     """, (id_q,))
         exact_rows = [dict(r) for r in cur.fetchall()]
     if name_q and not exact_rows:
         cur.execute("""
                     SELECT entity_id, full_name, id_number, source, notes, 0.95 AS score, 'NAME_EXACT' AS match_type
                     FROM watchlist_entity WHERE LOWER(full_name)=LOWER(?)
-                        LIMIT 10;
+                    LIMIT 10;
                     """, (name_q,))
         exact_rows = [dict(r) for r in cur.fetchall()] or exact_rows
     loose_rows = []
@@ -243,7 +243,7 @@ def _sqlite_exact_like(conn, name_q: str, id_q: str):
         cur.execute("""
                     SELECT entity_id, full_name, id_number, source, notes, 0.70 AS score, 'NAME_LIKE' AS match_type
                     FROM watchlist_entity WHERE LOWER(full_name) LIKE LOWER(?)
-                        LIMIT 10;
+                    LIMIT 10;
                     """, (f"%{name_q}%",))
         loose_rows = [dict(r) for r in cur.fetchall()]
     return exact_rows, loose_rows
@@ -265,7 +265,7 @@ def _sqlite_vector(conn, query_vec: Optional[List[float]]):
                 SELECT entity_id, full_name, id_number, source, notes, embedding
                 FROM watchlist_entity
                 WHERE embedding IS NOT NULL
-                    LIMIT 5000;
+                LIMIT 5000;
                 """)
     rows = []
     for r in cur.fetchall():
@@ -302,11 +302,11 @@ def _merge_and_score(exact_rows, loose_rows, vector_rows):
 
 @tool("watchlist_search")
 def watchlist_search(
-        name: Optional[str] = None,
-        id_number: Optional[str] = None,
-        address: Optional[str] = None,
-        email: Optional[str] = None,
-        requester_ref: Optional[str] = None
+        name: str = "",
+        id_number: str = "",
+        address: str = "",
+        email: str = "",
+        requester_ref: str = ""
 ) -> str:
     """
     FraudCheck/Watchlist lookup (SQLite-only).
@@ -332,18 +332,10 @@ def watchlist_search(
         - Matching strategy: exact ID -> exact NAME -> LIKE NAME -> vector cosine over JSON embeddings.
         - No audit writes (POC mode).
     """
-    # Normalize None -> "" early so everything downstream is consistent
-    name = _normalize(name)
-    id_number = _normalize(id_number)
-    address = _normalize(address)
-    email = _normalize(email)
-    requester_ref = _normalize(requester_ref)
-
     ts = time.strftime("%Y-%m-%d %H:%M:%S")
     logger.info("[%s] watchlist_search name=%r id=%r db=%s", ts, name, id_number, DB_PATH)
 
-    # Build the embedding text from normalized fields
-    embed_text = " | ".join([s for s in (name, id_number, address, email) if s]).strip()
+    embed_text = " | ".join([s for s in [name, id_number, address, email] if s]).strip()
     emb_vec = None
     provider = "openai"
     if embed_text:
@@ -363,18 +355,12 @@ def watchlist_search(
         _seed_if_empty(conn, min_rows=20)
 
         # Search paths
-        exact_rows, loose_rows = _sqlite_exact_like(conn, name, id_number)
+        exact_rows, loose_rows = _sqlite_exact_like(conn, _normalize(name), _normalize(id_number))
         vector_rows = _sqlite_vector(conn, emb_vec)
         matches, top_score, hard_exact = _merge_and_score(exact_rows, loose_rows, vector_rows)
 
         payload = {
-            "query": {
-                "name": name,
-                "id_number": id_number,
-                "address": address,
-                "email": email,
-                "requester_ref": requester_ref
-            },
+            "query": {"name": name, "id_number": id_number, "address": address, "email": email, "requester_ref": requester_ref},
             "embedding": {"provider": provider, "model": EMBED_MODEL, "dims": EMBED_DIMS, "used": emb_vec is not None},
             "top_score": round(float(top_score), 4),
             "matches": [
@@ -403,18 +389,3 @@ def watchlist_search(
         return json.dumps(payload, ensure_ascii=False)
     finally:
         conn.close()
-
-# --- Pydantic forward-ref fix for CrewAI tool schema ---
-try:
-    # pass a namespace that defines Optional so "ForwardRef('Optional[str]')" can be resolved
-    from typing import Optional as _Optional
-    watchlist_search.model_rebuild(
-        force=True,
-        _types_namespace=(globals() | {'Optional': _Optional, 'str': str})
-    )
-except Exception as _e:
-    # keep it quiet in prod; DEBUG if you want to see it
-    try:
-        logger.debug("watchlist_search.model_rebuild skipped: %s", _e)
-    except Exception:
-        pass
