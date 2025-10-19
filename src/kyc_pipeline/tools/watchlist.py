@@ -332,6 +332,13 @@ def watchlist_search(
         - Matching strategy: exact ID -> exact NAME -> LIKE NAME -> vector cosine over JSON embeddings.
         - No audit writes (POC mode).
     """
+    # Convert None to empty string at the start
+    name = name or ""
+    id_number = id_number or ""
+    address = address or ""
+    email = email or ""
+    requester_ref = requester_ref or ""
+
     ts = time.strftime("%Y-%m-%d %H:%M:%S")
     logger.info("[%s] watchlist_search name=%r id=%r db=%s", ts, name, id_number, DB_PATH)
 
