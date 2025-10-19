@@ -101,8 +101,8 @@ risk_task:
     Do not guess the result without calling it.
     Based on the score field value under matches tag, grade risk as LOW|MEDIUM|HIGH
     if the score is 0.0, risk is LOW. 
-    if score is greater than 0.0 and lesser than 0.5, risk is MEDIUM. 
-    if score is higher than 0.5, risk is HIGH.
+    if score is greater than 0.6 and lesser than 0.8, risk is MEDIUM. 
+    if score is higher than 0.8, risk is HIGH.
     Call this task exactly once. you may not use ‘Ask/Delegate to coworker’. Run the task once and proceed.
   expected_output: |
     JSON RiskAssessment: {
