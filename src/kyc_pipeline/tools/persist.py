@@ -202,6 +202,22 @@ def save_decision_record(
     Tolerant to arg-name variants commonly produced by LLMs.
     """
 
+    # DEBUG: Print what we received
+    print("=" * 60)
+    print("DEBUG: save_decision_record called with:")
+    print(f"  final_decision: {final_decision}")
+    print(f"  explanation: {explanation}")
+    print(f"  doc_id: {doc_id}")
+    print(f"  file_name: {file_name}")
+    print(f"  customer_name: {customer_name}")
+    print(f"  identification_no: {identification_no}")
+    print(f"  email_id: {email_id}")
+    print(f"  created_at: {created_at}")
+    print(f"  modified_at: {modified_at}")
+    print(f"  audit_log: {audit_log}")
+    print(f"  kwargs: {kwargs}")
+    print("=" * 60)
+
     # ---------- alias normalization ----------
     if final_decision is None:
         final_decision = (
