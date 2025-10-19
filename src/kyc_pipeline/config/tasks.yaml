@@ -111,21 +111,56 @@ risk_task:
       "matches": [{"name": "string", "score": float}][]
     }
 
-# Add this to your tasks.yaml file
 decision_task:
   description: >
-    Review the following KYC processing results:
-    - Extracted Document Data: {extract_task.output}
-    - Content Structure Judgment: {judge_task.output}
-    - Business Rules Compliance: {bizrules_task.output}
-    - Fraud Risk Assessment: {risk_task.output}
+    You are the final decision maker. Review ALL previous task outputs:
+    
+    DOCUMENT EXTRACTION RESULTS:
+    {extract_task.output}
+    
+    CONTENT STRUCTURE JUDGMENT:
+    {judge_task.output}
+    
+    BUSINESS RULES COMPLIANCE:
+    {bizrules_task.output}
+    
+    FRAUD RISK ASSESSMENT:
+    {risk_task.output}
+    
+    Based on these results, make your final KYC decision (APPROVE, REJECT, or HUMAN_REVIEW).
+    
+    CRITICAL INSTRUCTIONS FOR save_decision_record TOOL:
+    
+    When calling save_decision_record, you MUST construct the audit_log parameter as a list
+    of 4 clear summary statements (one for each previous agent). DO NOT use template strings
+    like "{extract_task.output}". Instead, write actual summaries based on what you see above.
+    
+    Example of CORRECT audit_log format:
+    [
+      "Document OCR by DocumentAgent: Successfully extracted name, DOB, ID number, email with confidence 0.85",
+      "Validation check by BizRuleAgent: No compliance violations detected, all rules passed",
+      "Verifying document by JudgmentAgent: Document completeness confirmed, passed validation",
+      "WatchList and Namecheck by RiskAgent: Low risk grade with score 0.15, no matches found"
+    ]
+    
+    Example of WRONG audit_log (DO NOT DO THIS):
+    [
+      "Extracted Document Data: {extract_task.output}",
+      "Business Rules Compliance: {bizrules_task.output}"
+    ]
+    
+    Call save_decision_record with these parameters:
+    - final_decision: "APPROVE" | "REJECT" | "HUMAN_REVIEW"
+    - explanation: Detailed reasoning for your decision
+    - file_name: Extract from the document context
+    - customer_name: Extract from the extraction results
+    - identification_no: Extract from the extraction results
+    - email_id: Extract from the extraction results
+    - doc_id: Extract from the document context
+    - audit_log: [List of 4 clear summary strings as shown above]
+    
+    After saving, send an email notification.
 
-    Synthesize all this information to make a final decision. The decision must be one of:
-    'APPROVE', 'REJECT', or 'HUMAN_REVIEW'.
-
-    Finally, call your tools exactly once to:
-    1) Send an email notification containing the final decision and a brief, clear explanation.
-    2) Persist the complete run log with the final decision and explanation included.
   expected_output: >
     Return ONLY a JSON object that conforms to the FinalDecision model:
     {
