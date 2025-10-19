@@ -338,5 +338,56 @@
       "2025-09-15 14:00:00 WatchList and Namecheck by RiskAgent,step skipped due to validation failure",
       "2025-09-15 14:05:10 DecisionAgent concluded processing,marked FAILED,insufficient or inconsistent documentation"
     ]
+  },
+  {
+    "id": 21,
+    "File_Name": "Extract from the document context",
+    "customer_name": "Alicia Bob",
+    "identification_no": "G456778AB",
+    "email_id": "alicia@example.com",
+    "final_decision": "PROCESSED",
+    "created_at": "2023-10-01 12:00:00",
+    "modified_at": "2023-10-01 12:20:00",
+    "audit_log": [
+      "2023-10-01 12:00:00 Document OCR by DocumentAgent,fields extracted successfully",
+      "2023-10-01 12:05:00 Validation check by BizRuleAgent,format and ID rules passed",
+      "2023-10-01 12:10:00 Verifying document by JudgmentAgent,selfie match and consistency confirmed",
+      "2023-10-01 12:15:00 WatchList and Namecheck by RiskAgent,no hits detected",
+      "2023-10-01 12:20:00 DecisionAgent concluded processing,status PROCESSED"
+    ]
+  },
+  {
+    "id": 22,
+    "File_Name": "Extract from the document context",
+    "customer_name": "Alicia Bob",
+    "identification_no": "G456778AB",
+    "email_id": "alicia@example.com",
+    "final_decision": "FAILED",
+    "created_at": "2023-10-01 12:00:00",
+    "modified_at": "2023-10-01 12:00:00",
+    "audit_log": [
+      "2023-10-01 12:00:00 Document OCR by DocumentAgent,fields extracted successfully",
+      "2023-10-01 12:00:00 Validation check by BizRuleAgent,critical rule violation detected",
+      "2023-10-01 12:00:00 Verifying document by JudgmentAgent,mismatch could not be resolved",
+      "2023-10-01 12:00:00 WatchList and Namecheck by RiskAgent,no hits detected",
+      "2023-10-01 12:00:00 DecisionAgent concluded processing,marked FAILED,insufficient or inconsistent documentation"
+    ]
+  },
+  {
+    "id": 23,
+    "File_Name": "KYC_Document_Extraction",
+    "customer_name": "Jithesh Nidhi",
+    "identification_no": "T1234567G",
+    "email_id": "nidhi jite@example.com",
+    "final_decision": "INPROCESS",
+    "created_at": "2023-10-01 12:00:00",
+    "modified_at": "2023-10-01 12:20:00",
+    "audit_log": [
+      "2023-10-01 12:00:00 Document OCR by DocumentAgent,fields extracted successfully",
+      "2023-10-01 12:05:00 Validation check by BizRuleAgent,format and ID rules passed",
+      "2023-10-01 12:10:00 Verifying document by JudgmentAgent,selfie match and consistency confirmed",
+      "2023-10-01 12:15:00 WatchList and Namecheck by RiskAgent,step skipped due to validation failure",
+      "2023-10-01 12:20:00 DecisionAgent concluded processing,status INPROCESS,awaiting additional evidence/verification"
+    ]
   }
 ]

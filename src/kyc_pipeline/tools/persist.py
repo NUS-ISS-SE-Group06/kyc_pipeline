@@ -1,11 +1,9 @@
-
 # src/kyc_pipeline/tools/persist.py
-import json
-import os
+import json, tempfile, os
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, List, Union
+from typing import Any, Dict, Optional, List, Union
 from crewai.tools import tool
 
 # ---------- helpers ----------
@@ -22,17 +20,17 @@ def _ensure_db_schema(db_path: Path) -> None:
         cur.execute(
             """
             CREATE TABLE IF NOT EXISTS kyc_decisions (
-                id                INTEGER PRIMARY KEY AUTOINCREMENT,
-                created_at        TEXT NOT NULL,          -- time row was created (UTC)
-                modified_at       TEXT,                   -- optional explicit modified_at
-                doc_id            TEXT,
-                file_name         TEXT,
-                customer_name     TEXT,
-                identification_no TEXT,
-                email_id          TEXT,
-                final_decision    TEXT NOT NULL,
-                explanation       TEXT NOT NULL,
-                audit_log         TEXT                    -- JSON-encoded list of strings
+                                                         id                INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                         created_at        TEXT NOT NULL,          -- time row was created (UTC)
+                                                         modified_at       TEXT,                   -- optional explicit modified_at
+                                                         doc_id            TEXT,
+                                                         file_name         TEXT,
+                                                         customer_name     TEXT,
+                                                         identification_no TEXT,
+                                                         email_id          TEXT,
+                                                         final_decision    TEXT NOT NULL,
+                                                         explanation       TEXT NOT NULL,
+                                                         audit_log         TEXT                    -- JSON-encoded list of strings
             )
             """
         )
@@ -40,18 +38,18 @@ def _ensure_db_schema(db_path: Path) -> None:
 
 
 def _insert_db_record(
-    db_path: Path,
-    *,
-    created_at: str,
-    modified_at: Optional[str],
-    doc_id: Optional[str],
-    file_name: Optional[str],
-    customer_name: Optional[str],
-    identification_no: Optional[str],
-    email_id: Optional[str],
-    final_decision: str,
-    explanation: str,
-    audit_log_json: Optional[str],
+        db_path: Path,
+        *,
+        created_at: str,
+        modified_at: Optional[str],
+        doc_id: Optional[str],
+        file_name: Optional[str],
+        customer_name: Optional[str],
+        identification_no: Optional[str],
+        email_id: Optional[str],
+        final_decision: str,
+        explanation: str,
+        audit_log_json: Optional[str],
 ) -> int:
     _ensure_db_schema(db_path)
     with sqlite3.connect(db_path) as conn:
@@ -59,8 +57,8 @@ def _insert_db_record(
         cur.execute(
             """
             INSERT INTO kyc_decisions
-              (created_at, modified_at, doc_id, file_name, customer_name,
-               identification_no, email_id, final_decision, explanation, audit_log)
+            (created_at, modified_at, doc_id, file_name, customer_name,
+             identification_no, email_id, final_decision, explanation, audit_log)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
@@ -80,13 +78,90 @@ def _insert_db_record(
         return int(cur.lastrowid)
 
 
-def _append_jsonl_in_dir(out_dir: Path, payload: dict) -> Path:
-    """Append as JSONL into <out_dir>/decisions.jsonl (ensure dir exists)."""
-    out_dir.mkdir(parents=True, exist_ok=True)
-    fpath = out_dir / "decisions.jsonl"
-    with fpath.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(payload, ensure_ascii=False) + "\n")
-    return fpath
+def _atomic_write_text(dest: Path, text: str) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=str(dest.parent), delete=False) as tmp:
+        tmp.write(text)
+        tmp.flush()
+        os.fsync(tmp.fileno())
+        tmp_path = Path(tmp.name)
+    tmp_path.replace(dest)
+
+
+def _get_next_id_from_array(arr: List[Dict[str, Any]]) -> int:
+    """Get the next sequential ID from existing array records."""
+    if not arr:
+        return 1
+    max_id = 0
+    for record in arr:
+        if "id" in record and isinstance(record["id"], int):
+            max_id = max(max_id, record["id"])
+    return max_id + 1
+
+
+def _append_to_json_array_file(file_path: Path, payload: Dict[str, Any]) -> Path:
+    """
+    Append (or repair then append) to a JSON **array file** safely and atomically.
+    Properly maps field names to match existing array structure.
+    """
+    arr: List[Dict[str, Any]] = []
+    if file_path.exists():
+        raw = file_path.read_text(encoding="utf-8").strip()
+        # Fast path: valid array
+        try:
+            maybe = json.loads(raw)
+            if isinstance(maybe, list):
+                arr = maybe
+            elif isinstance(maybe, dict):
+                arr = [maybe]
+        except Exception:
+            # Repair path: look for last closing bracket of an array
+            end_idx = raw.rfind("]")
+            if end_idx != -1:
+                head = raw[: end_idx + 1]
+                tail = raw[end_idx + 1 :].strip()
+                try:
+                    base = json.loads(head)
+                    if isinstance(base, list):
+                        arr = base
+                except Exception:
+                    arr = []
+                # Try to parse any trailing JSONL-ish objects
+                for line in tail.splitlines():
+                    line = line.strip().rstrip(",")
+                    if not line:
+                        continue
+                    try:
+                        obj = json.loads(line)
+                        if isinstance(obj, dict):
+                            arr.append(obj)
+                    except Exception:
+                        pass
+            else:
+                arr = []
+
+    # CRITICAL FIX: Map field names to match existing array structure
+    # Existing array uses: id, File_Name (not doc_id, file_name)
+    next_id = _get_next_id_from_array(arr)
+
+    array_record = {
+        "id": next_id,  # Sequential ID, not doc_id
+        "File_Name": payload.get("file_name") or payload.get("File_Name", ""),  # Capital F
+        "customer_name": payload.get("customer_name", ""),
+        "identification_no": payload.get("identification_no", ""),
+        "email_id": payload.get("email_id", ""),
+        "final_decision": payload.get("final_decision", "UNKNOWN"),
+        "created_at": payload.get("created_at", _utc_now_iso()),
+        "modified_at": payload.get("modified_at", _utc_now_iso()),
+        "audit_log": payload.get("audit_log", [])
+    }
+
+    # Remove explanation field as it's not in the existing array structure
+    # (only in the DB schema)
+
+    arr.append(array_record)
+    _atomic_write_text(file_path, json.dumps(arr, ensure_ascii=False, indent=2))
+    return file_path
 
 
 def _append_jsonl_to_file(file_path: Path, payload: dict) -> Path:
@@ -97,54 +172,67 @@ def _append_jsonl_to_file(file_path: Path, payload: dict) -> Path:
     return file_path
 
 
+def _append_jsonl_in_dir(out_dir: Path, payload: dict) -> Path:
+    """Append as JSONL into <out_dir>/decisions.jsonl (ensure dir exists)."""
+    out_dir.mkdir(parents=True, exist_ok=True)
+    fpath = out_dir / "decisions.jsonl"
+    with fpath.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    return fpath
+
+
 # ---------- tool ----------
 
 @tool("save_decision_record")
 def save_decision_record(
-    # all optional & tolerant; agent can pass any subset
-    final_decision: Optional[str] = None,
-    explanation: Optional[str] = None,
-    doc_id: Optional[str] = None,
-    file_name: Optional[str] = None,
-    customer_name: Optional[str] = None,
-    identification_no: Optional[str] = None,
-    email_id: Optional[str] = None,
-    created_at: Optional[str] = None,
-    modified_at: Optional[str] = None,
-    audit_log: Optional[Union[List[str], str]] = None,
-    **kwargs,
+        final_decision: Optional[str] = None,
+        explanation: Optional[str] = None,
+        doc_id: Optional[str] = None,
+        file_name: Optional[str] = None,
+        customer_name: Optional[str] = None,
+        identification_no: Optional[str] = None,
+        email_id: Optional[str] = None,
+        created_at: Optional[str] = None,
+        modified_at: Optional[str] = None,
+        audit_log: Optional[Union[List[str], str]] = None,
+        **kwargs,
 ) -> str:
     """
-    Persist the final KYC decision (DB + JSONL audit).
+    Persist the final KYC decision (DB + JSON/JSONL audit).
     Tolerant to arg-name variants commonly produced by LLMs.
-
-    Known aliases handled:
-      - final_decision: 'decision', 'finalDecision', 'verdict', 'status'
-      - explanation: 'reason', 'rationale', 'explain', 'message'
-      - doc_id: 'docId', 'document_id', 'documentId'
-      - file_name: 'File_Name', 'fileName', 'filename'
-      - customer_name: 'name', 'customerName', 'applicant'
-      - identification_no: 'id_number', 'idNumber', 'national_id', 'nric', 'passport'
-      - email_id: 'email', 'to', 'email_to', 'recipient'
-      - created_at/modified_at: timestamps (ISO preferred); if missing, we fill defaults
-      - audit_log: either list[str] or single string; we normalize to list[str]
     """
+
+    # DEBUG: Print what we received
+    print("=" * 60)
+    print("DEBUG: save_decision_record called with:")
+    print(f"  final_decision: {final_decision}")
+    print(f"  explanation: {explanation}")
+    print(f"  doc_id: {doc_id}")
+    print(f"  file_name: {file_name}")
+    print(f"  customer_name: {customer_name}")
+    print(f"  identification_no: {identification_no}")
+    print(f"  email_id: {email_id}")
+    print(f"  created_at: {created_at}")
+    print(f"  modified_at: {modified_at}")
+    print(f"  audit_log: {audit_log}")
+    print(f"  kwargs: {kwargs}")
+    print("=" * 60)
 
     # ---------- alias normalization ----------
     if final_decision is None:
         final_decision = (
-            kwargs.get("decision")
-            or kwargs.get("finalDecision")
-            or kwargs.get("verdict")
-            or kwargs.get("status")
+                kwargs.get("decision")
+                or kwargs.get("finalDecision")
+                or kwargs.get("verdict")
+                or kwargs.get("status")
         )
     if explanation is None:
         explanation = (
-            kwargs.get("explanation")
-            or kwargs.get("reason")
-            or kwargs.get("rationale")
-            or kwargs.get("explain")
-            or kwargs.get("message")
+                kwargs.get("explanation")
+                or kwargs.get("reason")
+                or kwargs.get("rationale")
+                or kwargs.get("explain")
+                or kwargs.get("message")
         )
     if doc_id is None:
         doc_id = kwargs.get("docId") or kwargs.get("document_id") or kwargs.get("documentId")
@@ -154,11 +242,11 @@ def save_decision_record(
         customer_name = kwargs.get("name") or kwargs.get("customerName") or kwargs.get("applicant")
     if identification_no is None:
         identification_no = (
-            kwargs.get("id_number")
-            or kwargs.get("idNumber")
-            or kwargs.get("national_id")
-            or kwargs.get("nric")
-            or kwargs.get("passport")
+                kwargs.get("id_number")
+                or kwargs.get("idNumber")
+                or kwargs.get("national_id")
+                or kwargs.get("nric")
+                or kwargs.get("passport")
         )
     if email_id is None:
         email_id = kwargs.get("email_id") or kwargs.get("email") or kwargs.get("to") or kwargs.get("email_to") or kwargs.get("recipient")
@@ -174,7 +262,6 @@ def save_decision_record(
     explanation = explanation or "No explanation provided."
 
     created_at = created_at or _utc_now_iso()
-    # If modified_at not provided, mirror created_at (keeps both populated for reviewers)
     modified_at = modified_at or created_at
 
     # normalize audit_log to a list[str]
@@ -186,9 +273,9 @@ def save_decision_record(
         audit_log_list = []
 
     # ---------- persist ----------
-    db_path = Path(os.getenv("DECISIONS_DB_PATH", "kyc_local.db"))
+    db_path = Path(os.getenv("DECISIONS_DB_PATH", "data/kyc_local.db"))
 
-    # DB insert (never crash if DB write fails)
+    # DB insert
     row_id: Optional[int] = None
     try:
         row_id = _insert_db_record(
@@ -207,12 +294,13 @@ def save_decision_record(
     except Exception:
         row_id = None
 
-    # JSONL audit append (supports either single-file or directory mode)
+    # JSON/JSONL audit append
     audit_payload = {
         "created_at": created_at,
         "modified_at": modified_at,
         "doc_id": doc_id,
-        "file_name": file_name,
+        "file_name": file_name,  # Keep as file_name for internal consistency
+        "File_Name": file_name,  # Also include with capital F for array format
         "customer_name": customer_name,
         "identification_no": identification_no,
         "email_id": email_id,
@@ -221,11 +309,15 @@ def save_decision_record(
         "audit_log": audit_log_list,
     }
 
-    kyc_status_file = os.getenv("KYC_STATUS_FILE")  # e.g., "data/kyc_status.json" (JSONL)
+    kyc_status_file = os.getenv("KYC_STATUS_FILE")
     if kyc_status_file:
-        audit_file = _append_jsonl_to_file(Path(kyc_status_file), audit_payload)
+        fpath = Path(kyc_status_file)
+        # Use JSON array format for .json files, JSONL for .jsonl files
+        if fpath.suffix.lower() == '.json':
+            audit_file = _append_to_json_array_file(fpath, audit_payload)
+        else:
+            audit_file = _append_jsonl_to_file(fpath, audit_payload)
     else:
-        # fallback to dir mode (decisions.jsonl under this dir)
         audit_dir = Path(os.getenv("DECISIONS_AUDIT_DIR", "runlogs"))
         audit_file = _append_jsonl_in_dir(audit_dir, audit_payload)
 
@@ -237,5 +329,4 @@ def save_decision_record(
         ensure_ascii=False,
     )
 
-# ensure pydantic model is fully built for some CrewAI wrappers
 save_decision_record.model_rebuild()

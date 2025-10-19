@@ -20,6 +20,7 @@ extract_task:
       "dob": string|null,
       "address": string|null,
       "id_number": string|null,
+      "email": string|null,
       "has_face_photo": boolean|null,
       "coverage_notes": string|null,
       "confidence": float
@@ -91,12 +92,17 @@ bizrules_task:
 risk_task:
   description: >
     Perform a watchlist screen for the extracted entity.
-    You MUST call the tool `watchlist_search` with the best arguments you can infer from the inputs (name, id_number). Do not guess the result without calling it.
-    Use name & id_number from extract task response
+    You MUST call the tool `watchlist_search` with ALL available fields from extract_task.output.
+    - name: from ExtractedKyc.name
+    - id_number: from ExtractedKyc.id_number
+    - address: from ExtractedKyc.address (use empty string "" if null)
+    - email: from ExtractedKyc.email (use empty string "" if null)
+    - requester_ref: can be empty string ""
+    Do not guess the result without calling it.
     Based on the score field value under matches tag, grade risk as LOW|MEDIUM|HIGH
     if the score is 0.0, risk is LOW. 
-    if score is greater than 0.0 and lesser than 0.5, risk is MEDIUM. 
-    if score is higher than 0.5, risk is HIGH.
+    if score is greater than 0.6 and lesser than 0.8, risk is MEDIUM. 
+    if score is higher than 0.8, risk is HIGH.
     Call this task exactly once. you may not use ‘Ask/Delegate to coworker’. Run the task once and proceed.
   expected_output: |
     JSON RiskAssessment: {
@@ -105,21 +111,89 @@ risk_task:
       "matches": [{"name": "string", "score": float}][]
     }
 
-# Add this to your tasks.yaml file
 decision_task:
   description: >
-    Review the following KYC processing results:
-    - Extracted Document Data: {extract_task.output}
-    - Content Structure Judgment: {judge_task.output}
-    - Business Rules Compliance: {bizrules_task.output}
-    - Fraud Risk Assessment: {risk_task.output}
+    You are the final decision maker. Review ALL previous task outputs:
+    
+    DOCUMENT EXTRACTION RESULTS:
+    {extract_task.output}
+    
+    CONTENT STRUCTURE JUDGMENT:
+    {judge_task.output}
+    
+    BUSINESS RULES COMPLIANCE:
+    {bizrules_task.output}
+    
+    FRAUD RISK ASSESSMENT:
+    {risk_task.output}
+    
+    Based on these results, make your final KYC decision (APPROVE, REJECT, or HUMAN_REVIEW).
+    
+    CRITICAL INSTRUCTIONS FOR save_decision_record TOOL:
+    
+    1. FINAL DECISION MAPPING FOR FILE STORAGE:
+       When calling save_decision_record, map your decision as follows:
+       - If your decision is "APPROVE" → set final_decision parameter to "PROCESSED"
+       - If your decision is "REJECT" → set final_decision parameter to "FAILED"
+       - If your decision is "HUMAN_REVIEW" → set final_decision parameter to "INPROCESS"
+    
+    2. AUDIT LOG FORMAT:
+       Each audit_log entry must follow this EXACT format:
+       "YYYY-MM-DD HH:MM:SS Agent description,action/result"
+    
+       Example entries:
+       - "2025-09-15 08:45:00 Document OCR by DocumentAgent,fields extracted successfully"
+       - "2025-09-15 08:50:15 Validation check by BizRuleAgent,format and ID rules passed"
+       - "2025-09-15 08:55:30 Verifying document by JudgmentAgent,selfie match and consistency confirmed"
+       - "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent,no hits detected"
+       - "2025-09-15 09:05:10 DecisionAgent concluded processing,status PROCESSED"
+    
+       IMPORTANT FORMAT RULES:
+       - Use comma (,) NOT colon (:) between description and action
+       - Include timestamp in format "YYYY-MM-DD HH:MM:SS"
+       - Keep descriptions concise and actions brief
+       - Final entry should include the mapped status (PROCESSED/INPROCESS/FAILED)
+    
+    3. AUDIT LOG CONSTRUCTION GUIDELINES:
+       Create 5 summary statements based on actual task outputs:
+    
+       Entry 1 - Document OCR by DocumentAgent:
+       - If extraction successful with good confidence: "fields extracted successfully"
+       - If partial extraction: "partial/clean extraction"
+       - If low quality: "low quality/partial capture"
+    
+       Entry 2 - Validation check by BizRuleAgent:
+       - If no violations: "format and ID rules passed"
+       - If minor issues: "one or more fields require confirmation"
+       - If critical violations: "critical rule violation detected"
+    
+       Entry 3 - Verifying document by JudgmentAgent:
+       - If passed validation: "selfie match and consistency confirmed"
+       - If needs review: "queued for manual review"
+       - If failed: "mismatch could not be resolved"
+    
+       Entry 4 - WatchList and Namecheck by RiskAgent:
+       - If LOW risk: "no hits detected"
+       - If MEDIUM risk: "screening in progress"
+       - If HIGH risk or validation failed: "step skipped due to validation failure"
+    
+       Entry 5 - DecisionAgent concluded processing:
+       - If decision is APPROVE: "status PROCESSED"
+       - If decision is HUMAN_REVIEW: "status INPROCESS,awaiting additional evidence/verification"
+       - If decision is REJECT: "marked FAILED,insufficient or inconsistent documentation"
+    
+    Call save_decision_record with these parameters:
+    - final_decision: "PROCESSED" (if APPROVE) | "INPROCESS" (if HUMAN_REVIEW) | "FAILED" (if REJECT)
+    - explanation: Detailed reasoning for your decision
+    - file_name: Extract from the document context
+    - customer_name: Extract from the extraction results
+    - identification_no: Extract from the extraction results
+    - email_id: Extract from the extraction results
+    - doc_id: Extract from the document context
+    - audit_log: [Array of 5 strings in the exact format shown above]
+    
+    After saving, send an email notification.
 
-    Synthesize all this information to make a final decision. The decision must be one of:
-    'APPROVE', 'REJECT', or 'HUMAN_REVIEW'.
-
-    Finally, call your tools exactly once to:
-    1) Send an email notification containing the final decision and a brief, clear explanation.
-    2) Persist the complete run log with the final decision and explanation included.
   expected_output: >
     Return ONLY a JSON object that conforms to the FinalDecision model:
     {
