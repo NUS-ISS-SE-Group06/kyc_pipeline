@@ -199,7 +199,8 @@ def _seed_if_empty(conn: sqlite3.Connection, min_rows: int = 20) -> None:
         ("Peter Chan", "HKG7788990M", "Kowloon, HK", "peter@example.hk", "Shell company links"),
         ("Fatima Noor", "PAK1239876N", "Karachi, PK", "fatima@example.pk", "Investigative lead"),
         ("Global Trade LLC", "UEN202012345B", "Raffles Place, Singapore", "contact@globaltrade.example", "Dormant"),
-        ("OceanPay Ltd", "UEN201812300Z", "Tanjong Pagar, Singapore", "support@oceanpay.example", "Chargeback cluster")
+        ("OceanPay Ltd", "UEN201812300Z", "Tanjong Pagar, Singapore", "support@oceanpay.example", "Chargeback cluster"),
+        ("Jitesh Nidhi", "T123456789", "Tampines, Singapore", "nidhi.jitesh.nus@gmail.com", "Watch notice")
     ]
 
     def _embed_text(full_name, id_number, address, email):
