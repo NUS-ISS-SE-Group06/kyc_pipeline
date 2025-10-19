@@ -16,6 +16,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "python-magic>=0.4.27",
     "uvicorn[standard]>=0.30",
+    ["reportlab>=4.0.0"],
  ]
 
 [dependency-groups]
