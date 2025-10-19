@@ -131,33 +131,66 @@ decision_task:
     
     CRITICAL INSTRUCTIONS FOR save_decision_record TOOL:
     
-    When calling save_decision_record, you MUST construct the audit_log parameter as a list
-    of 4 clear summary statements (one for each previous agent). DO NOT use template strings
-    like "{extract_task.output}". Instead, write actual summaries based on what you see above.
+    1. FINAL DECISION MAPPING FOR FILE STORAGE:
+       When calling save_decision_record, map your decision as follows:
+       - If your decision is "APPROVE" → set final_decision parameter to "PROCESSED"
+       - If your decision is "REJECT" → set final_decision parameter to "FAILED"
+       - If your decision is "HUMAN_REVIEW" → set final_decision parameter to "INPROCESS"
     
-    Example of CORRECT audit_log format:
-    [
-      "Document OCR by DocumentAgent: Successfully extracted name, DOB, ID number, email with confidence 0.85",
-      "Validation check by BizRuleAgent: No compliance violations detected, all rules passed",
-      "Verifying document by JudgmentAgent: Document completeness confirmed, passed validation",
-      "WatchList and Namecheck by RiskAgent: Low risk grade with score 0.15, no matches found"
-    ]
+    2. AUDIT LOG FORMAT:
+       Each audit_log entry must follow this EXACT format:
+       "YYYY-MM-DD HH:MM:SS Agent description,action/result"
     
-    Example of WRONG audit_log (DO NOT DO THIS):
-    [
-      "Extracted Document Data: {extract_task.output}",
-      "Business Rules Compliance: {bizrules_task.output}"
-    ]
+       Example entries:
+       - "2025-09-15 08:45:00 Document OCR by DocumentAgent,fields extracted successfully"
+       - "2025-09-15 08:50:15 Validation check by BizRuleAgent,format and ID rules passed"
+       - "2025-09-15 08:55:30 Verifying document by JudgmentAgent,selfie match and consistency confirmed"
+       - "2025-09-15 09:00:00 WatchList and Namecheck by RiskAgent,no hits detected"
+       - "2025-09-15 09:05:10 DecisionAgent concluded processing,status PROCESSED"
+    
+       IMPORTANT FORMAT RULES:
+       - Use comma (,) NOT colon (:) between description and action
+       - Include timestamp in format "YYYY-MM-DD HH:MM:SS"
+       - Keep descriptions concise and actions brief
+       - Final entry should include the mapped status (PROCESSED/INPROCESS/FAILED)
+    
+    3. AUDIT LOG CONSTRUCTION GUIDELINES:
+       Create 5 summary statements based on actual task outputs:
+    
+       Entry 1 - Document OCR by DocumentAgent:
+       - If extraction successful with good confidence: "fields extracted successfully"
+       - If partial extraction: "partial/clean extraction"
+       - If low quality: "low quality/partial capture"
+    
+       Entry 2 - Validation check by BizRuleAgent:
+       - If no violations: "format and ID rules passed"
+       - If minor issues: "one or more fields require confirmation"
+       - If critical violations: "critical rule violation detected"
+    
+       Entry 3 - Verifying document by JudgmentAgent:
+       - If passed validation: "selfie match and consistency confirmed"
+       - If needs review: "queued for manual review"
+       - If failed: "mismatch could not be resolved"
+    
+       Entry 4 - WatchList and Namecheck by RiskAgent:
+       - If LOW risk: "no hits detected"
+       - If MEDIUM risk: "screening in progress"
+       - If HIGH risk or validation failed: "step skipped due to validation failure"
+    
+       Entry 5 - DecisionAgent concluded processing:
+       - If decision is APPROVE: "status PROCESSED"
+       - If decision is HUMAN_REVIEW: "status INPROCESS,awaiting additional evidence/verification"
+       - If decision is REJECT: "marked FAILED,insufficient or inconsistent documentation"
     
     Call save_decision_record with these parameters:
-    - final_decision: "APPROVE" | "REJECT" | "HUMAN_REVIEW"
+    - final_decision: "PROCESSED" (if APPROVE) | "INPROCESS" (if HUMAN_REVIEW) | "FAILED" (if REJECT)
     - explanation: Detailed reasoning for your decision
     - file_name: Extract from the document context
     - customer_name: Extract from the extraction results
     - identification_no: Extract from the extraction results
     - email_id: Extract from the extraction results
     - doc_id: Extract from the document context
-    - audit_log: [List of 4 clear summary strings as shown above]
+    - audit_log: [Array of 5 strings in the exact format shown above]
     
     After saving, send an email notification.
 
