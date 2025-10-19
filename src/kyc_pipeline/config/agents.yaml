@@ -15,7 +15,7 @@ extractor:
   goal: >
     MUST call `ocr_extract({{s3_uri}})` exactly once (if text not present in context),
     then output normalized JSON:
-    {name, dob, address, id_number, has_face_photo, confidence}.
+    {name, dob, address, id_number, email, has_face_photo, confidence}.
     If confidence cannot be computed, set confidence=0.80.
   backstory: OCR + parsing specialist with schema discipline.
   constraints: |
