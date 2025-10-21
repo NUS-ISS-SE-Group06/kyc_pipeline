@@ -1,28 +1,28 @@
 
-# Agentic KYC Document Processor 
-An event-driven KYC pipeline that starts when a document lands in S3. A ManagerCrew kicks off a sequence of YAML-defined tasks handled by five focused agents: Planner, Extractor,Judge, BizRule, Risk, decision_agent
+# :brain: Agentic KYC Document Processor 
+An **event-driven KYC pipeline** that starts when a document lands in S3. A **ManagerCrew** kicks off a sequence of YAML-defined tasks handled by six specialized agents: `Planner`, `Extractor`, `Judge`, `BizRule`, `Risk`, `Decision`.
 
-## How it runs (end-to-end)
+## :rocket: End-to-End Flow
 
-1. **Trigger**: New KYC file uploaded to **S3**
-2. **Process**: The S3 event invokes the **CrewAI endpoint**.
-3. **Execution**: ManagerCrew(hierarchical) orchestrates YAML-defined tasks. Agents rely on deterministic tools and constrained LLM checks.
-4. **Outputs**: Final Decision + explaination are produced and stored to persistent.
+1. **Trigger**: A New KYC document is uploaded to **S3**
+2. **Process**: The S3 event invokes the **CrewAI** endpoint.
+3. **Execution**: `ManagerCrew` orchestrates YAML-defined tasks using deterministic tools and constrained LLM checks.
+4. **Outputs**: A final Decision and explaination are persisted in storage.
 
-## Agents
+## 🧑‍💼 Agents Overview
 
-- **Planner** — Planner Agent (Manager)
-  - Goal: Plan & route KYC flows; request rework when confidence is low; keep provenance.
-  - Backstory: Decides next steps and keeps everyone honest with logs.
-  - Notes: Acts as the hierarchical manager in CrewAI (delegates tasks to other agents, aggregates outcomes).
+- 🧭 **Planner** — Planner Agent (Manager Agent)
+  - Goal: Plan & route KYC flows, request rework if confidence is low, maintain provenance.
+  - Backstory: Keeps the process accountable with logs and decision trails.
+  - Notes: Acts as the hierarchical manager in CrewAI, delegating tasks and aggregating results.
 
-- **Extractor** — Extraction Agent
-  - Goal: Extract name, dob, address, id_number, face_photo_presence from the document.
+- 📄 **Extractor** (Extraction Agent)
+  - Goal: Extract `name`, `dob`, `address`, `id_number`, `email`, `face_photo`.
   - Backstory: Uses OCR tool and heuristics.
-  - Tools: ocr_extract
-  - Outputs: extracted_fields, raw OCR text, confidence scores.
+  - Tools: `ocr_extract`
+  - Outputs: `extracted_fields`, raw OCR text, confidence scores.
 
-- **Judge** — Judgement Agent
+- ⚖️ **Judge** — Judgement Agent
   - Goal: Validate completeness; produce pass/fail with rationale & confidence; ask rework if needed.
   - Backstory: Structured QA and reflection.
   - Outputs: judge.verdict, judge.rationale, judge.confidence.
@@ -114,8 +114,6 @@ You can run unit tests via `pytest`.
 ```bash
 uv run -m pytest -q
 
-# Verbose and filtered run
-uv run -m pytest -vv tests/test_tools_ocr.py::test_ocr_extract_returns_expected_stub_text
 ```
 
 You can run server process via `uvicorn`.
@@ -178,12 +176,11 @@ curl http://localhost:8000/kyc_status?final_decision=PROCESSED&from_date=2025-09
 You can run promptfoo tests.
 
 ```bash
-rm -rf ~/.promptfoo/cache .promptfoo-cache
-npx promptfoo@latest eval -c ./promptfooconfig.yaml --env-path .env --no-cache --verbose
 
+promptfoo eval --no-cache
 
 # Display Promptfoo report
-npx promptfoo view
+promptfoo view
 
 ```
 
