@@ -12,7 +12,8 @@ def run():
 
     inputs = {
         "doc_id": "KYC-2025-0001",
-        "s3_uri": "<path>/idcard_john_doe.jpg",
+        "s3_uri": "/test/non-singaporean-kyc-form.pdf",  # good sample
+        #"s3_uri": "/test/bad-sample-kyc-form-age-violation.pdf",  # bad sample
         "doc_type": "KYC",
         "to_email": "applicant@example.com"
     }

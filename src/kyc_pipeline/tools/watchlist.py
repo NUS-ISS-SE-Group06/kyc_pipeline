@@ -199,7 +199,8 @@ def _seed_if_empty(conn: sqlite3.Connection, min_rows: int = 20) -> None:
         ("Peter Chan", "HKG7788990M", "Kowloon, HK", "peter@example.hk", "Shell company links"),
         ("Fatima Noor", "PAK1239876N", "Karachi, PK", "fatima@example.pk", "Investigative lead"),
         ("Global Trade LLC", "UEN202012345B", "Raffles Place, Singapore", "contact@globaltrade.example", "Dormant"),
-        ("OceanPay Ltd", "UEN201812300Z", "Tanjong Pagar, Singapore", "support@oceanpay.example", "Chargeback cluster")
+        ("OceanPay Ltd", "UEN201812300Z", "Tanjong Pagar, Singapore", "support@oceanpay.example", "Chargeback cluster"),
+        ("Jitesh Nidhi", "T123456789", "Tampines, Singapore", "nidhi.jitesh.nus@gmail.com", "Watch notice")
     ]
 
     def _embed_text(full_name, id_number, address, email):
@@ -208,7 +209,7 @@ def _seed_if_empty(conn: sqlite3.Connection, min_rows: int = 20) -> None:
     # Insert with embeddings
     for (full_name, id_number, address, email, notes) in demo:
         eid = str(uuid.uuid4())
-        
+
         try:
             emb = _embed(_embed_text(full_name, id_number, address, email)).vector
         except Exception as e:
@@ -228,14 +229,14 @@ def _sqlite_exact_like(conn, name_q: str, id_q: str):
         cur.execute("""
                     SELECT entity_id, full_name, id_number, source, notes, 1.0 AS score, 'ID_EXACT' AS match_type
                     FROM watchlist_entity WHERE LOWER(id_number)=LOWER(?)
-                        LIMIT 10;
+                    LIMIT 10;
                     """, (id_q,))
         exact_rows = [dict(r) for r in cur.fetchall()]
     if name_q and not exact_rows:
         cur.execute("""
                     SELECT entity_id, full_name, id_number, source, notes, 0.95 AS score, 'NAME_EXACT' AS match_type
                     FROM watchlist_entity WHERE LOWER(full_name)=LOWER(?)
-                        LIMIT 10;
+                    LIMIT 10;
                     """, (name_q,))
         exact_rows = [dict(r) for r in cur.fetchall()] or exact_rows
     loose_rows = []
@@ -243,7 +244,7 @@ def _sqlite_exact_like(conn, name_q: str, id_q: str):
         cur.execute("""
                     SELECT entity_id, full_name, id_number, source, notes, 0.70 AS score, 'NAME_LIKE' AS match_type
                     FROM watchlist_entity WHERE LOWER(full_name) LIKE LOWER(?)
-                        LIMIT 10;
+                    LIMIT 10;
                     """, (f"%{name_q}%",))
         loose_rows = [dict(r) for r in cur.fetchall()]
     return exact_rows, loose_rows
@@ -265,7 +266,7 @@ def _sqlite_vector(conn, query_vec: Optional[List[float]]):
                 SELECT entity_id, full_name, id_number, source, notes, embedding
                 FROM watchlist_entity
                 WHERE embedding IS NOT NULL
-                    LIMIT 5000;
+                LIMIT 5000;
                 """)
     rows = []
     for r in cur.fetchall():
@@ -332,6 +333,13 @@ def watchlist_search(
         - Matching strategy: exact ID -> exact NAME -> LIKE NAME -> vector cosine over JSON embeddings.
         - No audit writes (POC mode).
     """
+    # Convert None to empty string at the start
+    name = name or ""
+    id_number = id_number or ""
+    address = address or ""
+    email = email or ""
+    requester_ref = requester_ref or ""
+
     ts = time.strftime("%Y-%m-%d %H:%M:%S")
     logger.info("[%s] watchlist_search name=%r id=%r db=%s", ts, name, id_number, DB_PATH)
 
@@ -389,4 +397,3 @@ def watchlist_search(
         return json.dumps(payload, ensure_ascii=False)
     finally:
         conn.close()
-
