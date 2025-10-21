@@ -186,7 +186,8 @@ promptfoo view
 
 ## 📈 Monitoring
 
-Fro LLM usage metrics and observability
+For LLM usage metrics and observability:
+
 👉  https://app.agentops.ai/overview
 
 ## 🐋 Docker Compose
