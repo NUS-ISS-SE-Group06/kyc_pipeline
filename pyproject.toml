@@ -16,7 +16,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "python-magic>=0.4.27",
     "uvicorn[standard]>=0.30",
-]
+ ]
 
 [dependency-groups]
 dev = [
