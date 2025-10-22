@@ -1,0 +1,41 @@
+# ---- Business Rules Policy (Non-SG Default) ----
+
+# ---- NAME ----
+require_name: true
+name_min_len: 2
+name_max_len: 80
+name_allow_regex: "^[A-Za-z][A-Za-z\\-\\.' ]+$"
+
+# ---- DOB / AGE ----
+require_dob: true
+min_age: 18
+max_age: 120
+
+# ---- ID NUMBER ----
+require_id_number: true
+id_min_len: 8
+id_max_len: 12
+id_allow_regex: "^[A-Za-z0-9-]+$"
+
+# ---- ADDRESS ----
+require_address: true
+address_min_len: 10
+address_min_words: 2
+address_allow_regex: ""   # empty = no special regex restriction
+
+# ---- EMAIL (optional unless required here) ----
+# If require_email is true, email must be present & match regex.
+# If false/omitted, email is optional; if present, regex (if provided) still applies.
+require_email: true
+# Option A: Strict (recommended)
+# email_allow_regex: "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+
+# Option B: Lenient (allows space accidentally included before/after)
+# email_allow_regex: "^[A-Za-z0-9._%+-]+(?:\\s+[A-Za-z0-9._%+-]+)*@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,}$"
+
+# Option C: Disable email format check (only checks presence)
+email_allow_regex: ""
+
+# ---- FACE PHOTO (optional unless required here) ----
+# If require_has_face_photo is true, has_face_photo must be boolean true.
+require_has_face_photo: true
