@@ -168,11 +168,13 @@ jobs:
     needs: promptfoo
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     #if: github.event_name != 'pull_request'  # run on push/workflow_dispatch
-    env:
-      IMAGE: ghcr.io/${{ github.repository }}:${{ github.sha }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      - name: Set lower-case image name
+        run: |
+          lower=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE=ghcr.io/$lower:${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Build image
         run: docker build -t "$IMAGE" .
