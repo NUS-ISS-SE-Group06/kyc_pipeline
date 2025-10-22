@@ -9,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../src"
 lambda_handler_module = importlib.import_module("kyc_pipeline.lambda_handler")
 
 # 👇 Point directly to your local test file
-local_path = "/Users/britta/Documents/workstation/mtech/kyc_pipeline/test/Non-Singaporean-kyc-form.pdf"
+local_path = "/Users/britta/Documents/workstation/mtech/kyc_pipeline/test/non-singaporean-kyc-form.pdf"
 
 # Sample S3 event payload (simulating AWS Lambda trigger)
 event = {
