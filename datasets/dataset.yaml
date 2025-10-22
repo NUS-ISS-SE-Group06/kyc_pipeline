@@ -26,3 +26,7 @@
     - "A name mismatch requires enhanced due diligence (EDD), which may involve additional supporting documents or manual review."
   expected_output: "If there is a name mismatch, the system should trigger enhanced due diligence and request supporting documents or manual review."
 
+- input: "What is PEP screening in KYC?"
+  context:
+    - "PEP stands for Politically Exposed Person. Screening involves checking if the individual is listed as a PEP or a close associate."
+  expected_output: "PEP screening is the process of checking whether the customer is a politically exposed person or a close associate."
