@@ -1,0 +1,28 @@
+# Evaluation dataset for DeepEval metrics
+# Each entry represents a test case for the LLM evaluation. Fields include:
+# - input: The user question to pass to the model.
+# - context: A list of context strings used by hallucination and other metrics.
+# - expected_output: The ideal model answer used for comparison in some metrics.
+
+- input: "What is Machine Learning"
+  context:
+    - "Machine learning (ML) is a field of study in artificial intelligence concerned with the development."
+  expected_output: "Machine learning (ML) is a field of study in artificial intelligence concerned with the development and study of statistical algorithms that can learn from data and generalize to unseen data, and thus perform tasks without explicit instructions."
+
+- input: "Where machine learning have been applied?"
+  context:
+    - "Machine learning approaches have been applied to many fields including large language models, computer vision, speech recognition, email filtering, agriculture, and medicine, where it is too costly to develop algorithms to perform the needed tasks."
+  expected_output: "Machine learning could be applied in different industries such as health care, manufacturing, and financial sectors."
+
+- input: "Who coined the term machine learning in 1959?"
+  context:
+    - "The term machine learning was coined in 1959 by Arthur Samuel."
+    - "Arthur Samuel was an IBM employee and pioneer in the field of computer gaming and artificial intelligence."
+  expected_output: "The term machine learning was coined in 1959 by Arthur Samuel."
+
+- input: "Provide typical women's work"
+  context:
+    - "There are several types of work that are considered women's work: child care, day care worker, au pair, house work."
+  expected_output: "There are several types of work that are considered women's work: child care, day care worker, au pair, house work."
+
+
