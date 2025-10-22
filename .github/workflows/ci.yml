@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write  # needed to upload SARIF to Code Scanning
 
 jobs:
   build-cache:
@@ -39,11 +40,6 @@ jobs:
           
       - name: Install dependencies
         run: uv sync --dev
-
-      # - name: Lint with flake8
-      #   run: |
-      #     flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-      #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
   test:
     name: 🧪 Run Test
@@ -126,3 +122,101 @@ jobs:
             echo "## Promptfoo Summary" >> $GITHUB_STEP_SUMMARY
             cat promptfoo-summary.md >> $GITHUB_STEP_SUMMARY
           fi 
+
+  trivy-fs:
+    name: 🔍 Trivy FS Scan (PR)
+    runs-on: ubuntu-latest
+    needs: promptfoo
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Trivy FS → SARIF
+        uses: aquasecurity/trivy-action@v0.33.1
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs.sarif
+          security-checks: vuln,config,secret
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '0'   # allow SARIF upload even when findings exist
+
+      - name: Upload SARIF to Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs.sarif
+
+      - name: Enforce gate (fail on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@v0.33.1
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
+          security-checks: vuln,config,secret
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+          skip-setup-trivy: true
+
+  # trivy-image:
+  #   name: 🐳 Trivy Image Scan (push)
+  #   runs-on: ubuntu-latest
+  #   needs: promptfoo
+  #   if: github.event_name != 'pull_request'  # run on push/workflow_dispatch
+  #   env:
+  #     IMAGE: ghcr.io/${{ github.repository }}:${{ github.sha }}
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Build image
+  #       run: docker build -t "$IMAGE" .
+
+  #     - name: Trivy Image → SARIF
+  #       uses: aquasecurity/trivy-action@v0.33.1
+  #       with:
+  #         scan-type: image
+  #         image-ref: ${{ env.IMAGE }}
+  #         format: sarif
+  #         output: trivy-image.sarif
+  #         security-checks: vuln,config,secret
+  #         severity: CRITICAL,HIGH
+  #         ignore-unfixed: true
+  #         exit-code: '0'
+
+  #     - name: Upload SARIF to Code Scanning
+  #       if: always()
+  #       uses: github/codeql-action/upload-sarif@v3
+  #       with:
+  #         sarif_file: trivy-image.sarif
+
+  #     - name: (Optional) Generate SBOM (CycloneDX)
+  #       uses: aquasecurity/trivy-action@v0.33.1
+  #       with:
+  #         scan-type: image
+  #         image-ref: ${{ env.IMAGE }}
+  #         format: cyclonedx
+  #         output: sbom.cdx.json
+  #         skip-setup-trivy: true
+
+  #     - name: Upload SBOM artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: sbom-cyclonedx
+  #         path: sbom.cdx.json
+
+  #     - name: Enforce gate (fail on HIGH/CRITICAL)
+  #       uses: aquasecurity/trivy-action@v0.33.1
+  #       with:
+  #         scan-type: image
+  #         image-ref: ${{ env.IMAGE }}
+  #         format: table
+  #         security-checks: vuln,config,secret
+  #         severity: CRITICAL,HIGH
+  #         ignore-unfixed: true
+  #         exit-code: '1'
+  #         skip-setup-trivy: true
