@@ -171,6 +171,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Prepare .env for build
+        run: cp .env.example .env
+
       - name: Set lower-case image name
         run: |
           lower=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
