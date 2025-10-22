@@ -11,3 +11,4 @@ pillow>=11.3.0
 pymupdf>=1.26.4
 pytesseract>=0.3.13
 python-magic>=0.4.27
+reportlab>=4.0.0
