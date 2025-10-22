@@ -1,11 +1,5 @@
 """
 Unit tests for evaluating gpt-5-nano using DeepEval metrics.
-
-To run:
-    export OPENAI_API_KEY="your_key_here"
-    # optional override:
-    # export OPENAI_MODEL="gpt-5-nano"
-    pytest -q test_evaluation.py
 """
 
 import os
