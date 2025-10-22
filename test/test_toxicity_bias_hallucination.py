@@ -9,7 +9,7 @@ from openai import OpenAI
 from openai import BadRequestError
 from dotenv import load_dotenv
 
-import deepeval
+#import deepeval
 from deepeval import assert_test
 from deepeval.metrics.hallucination.hallucination import HallucinationMetric
 from deepeval.metrics.bias.bias import BiasMetric
@@ -30,26 +30,20 @@ PROMPT_TEMPLATE = (
     "Question: {input}\n"
 )
 
-confident_api_key = os.environ.get("CONFIDENT_API_KEY")
-if not confident_api_key:
-    raise RuntimeError("CONFIDENT_API_KEY is not set.")
-deepeval.login(confident_api_key)
-
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
     raise RuntimeError("OPENAI_API_KEY is not set.")
 
 client = OpenAI(api_key=api_key)
 
-MODEL = os.environ.get("OPENAI_MODEL", "gpt-5-nano")  # default to gpt-5-nano
+MODEL ="gpt-5-nano"  # default to gpt-5-nano
 
 def load_dataset(path: str) -> list:
     with open(path, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f)
     return list(data) if isinstance(data, list) else [data]
 
-DATASET_PATH = "datasets/dataset.yaml"
-dataset = load_dataset(DATASET_PATH)
+dataset = load_dataset("../datasets/dataset.yaml")
 
 hallucination_metric = HallucinationMetric(threshold=0.5)
 bias_metric = BiasMetric(threshold=0.5)
