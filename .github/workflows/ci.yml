@@ -70,9 +70,58 @@ jobs:
         run: uv sync --dev
 
       - name: Run tests with pytest
-        run: uv run pytest -v
+        run: uv run pytest -v test
         # Optional coverage:
         # run: uv run pytest -v --cov=kyc_pipeline --cov-report=term-missing
+  
+  deepeval-evals:
+    name: 🤖 DeepEval + Confident AI
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            pyproject.toml
+            uv.lock
+        continue-on-error: true
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Prepare env for DeepEval & Confident
+        run: |
+          {
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY_PROMPTFOO }}"
+            echo "CONFIDENT_API_KEY=${{ secrets.CONFIDENT_API_KEY }}"
+          } >> $GITHUB_ENV
+
+      # Run all DeepEval tests under ./evals
+      # - name: Run DeepEval
+      #   run: |
+      #     uv run deepeval test run evals || EXIT=$?
+      #     echo "DeepEval exit code: ${EXIT:-0}"
+      #     exit 0
+
+      - name: Run DeepEval sequentially (per file)
+        shell: bash
+        run: |
+          set -e
+          for f in $(find evals -maxdepth 1 -name 'test_*.py' | sort); do
+            echo "=== Running $f ==="
+            uv run deepeval test run "$f" || true
+          done
+
 
   promptfoo:
     runs-on: ubuntu-latest

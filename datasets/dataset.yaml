@@ -1,0 +1,32 @@
+# Evaluation dataset for DeepEval metrics (KYC use case)
+# Each entry represents a test case for evaluating the model’s output quality.
+# Fields:
+# - input: User/system prompt or question.
+# - context: Supporting factual information or rule references.
+# - expected_output: Ideal LLM response for comparison.
+
+
+- input: "What documents are required to onboard an individual customer for KYC?"
+  context:
+    - "Individual KYC onboarding requires a valid government-issued ID (e.g., passport or NRIC) and proof of address (e.g., utility bill or bank statement)."
+  expected_output: "To onboard an individual customer for KYC, the required documents are a valid government-issued ID and proof of address."
+
+- input: "What should be flagged as a high-risk country for KYC screening?"
+  context:
+    - "High-risk countries include those subject to FATF calls for action, sanctions lists, or jurisdictions with strategic AML/CFT deficiencies."
+  expected_output: "High-risk countries are jurisdictions subject to FATF calls for action, sanctions lists, or with strategic AML/CFT deficiencies."
+
+- input: "How to verify if a passport is expired?"
+  context:
+    - "The passport expiry date should be parsed from the MRZ or OCR result and compared with the current system date."
+  expected_output: "The passport is expired if the expiry date extracted from the document is earlier than the current date."
+
+- input: "How to handle a name mismatch between ID and application form?"
+  context:
+    - "A name mismatch requires enhanced due diligence (EDD), which may involve additional supporting documents or manual review."
+  expected_output: "If there is a name mismatch, the system should trigger enhanced due diligence and request supporting documents or manual review."
+
+- input: "What is PEP screening in KYC?"
+  context:
+    - "PEP stands for Politically Exposed Person. Screening involves checking if the individual is listed as a PEP or a close associate."
+  expected_output: "PEP screening is the process of checking whether the customer is a politically exposed person or a close associate."
