@@ -43,7 +43,7 @@ def load_dataset(path: str) -> list:
         data = yaml.safe_load(f)
     return list(data) if isinstance(data, list) else [data]
 
-dataset = load_dataset("../datasets/dataset.yaml")
+dataset = load_dataset("datasets/dataset.yaml")
 
 hallucination_metric = HallucinationMetric(threshold=0.5)
 bias_metric = BiasMetric(threshold=0.5)
