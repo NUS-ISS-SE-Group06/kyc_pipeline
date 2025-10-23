@@ -107,11 +107,21 @@ jobs:
           } >> $GITHUB_ENV
 
       # Run all DeepEval tests under ./evals
-      - name: Run DeepEval
+      # - name: Run DeepEval
+      #   run: |
+      #     uv run deepeval test run evals || EXIT=$?
+      #     echo "DeepEval exit code: ${EXIT:-0}"
+      #     exit 0
+
+      - name: Run DeepEval sequentially (per file)
+        shell: bash
         run: |
-          uv run deepeval test run evals || EXIT=$?
-          echo "DeepEval exit code: ${EXIT:-0}"
-          exit 0
+          set -e
+          for f in $(find evals -maxdepth 1 -name 'test_*.py' | sort); do
+            echo "=== Running $f ==="
+            uv run deepeval test run "$f" || true
+          done
+
 
   promptfoo:
     runs-on: ubuntu-latest
