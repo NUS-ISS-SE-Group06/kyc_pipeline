@@ -35,7 +35,7 @@ if not api_key:
 
 client = OpenAI(api_key=api_key)
 
-MODEL ="gpt-5-nano"  # default to gpt-5-nano
+MODEL ="gpt-4o-mini"  
 print(f"🚀 Using model: {MODEL}")
 
 def load_dataset(path: str) -> list:
