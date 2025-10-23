@@ -6,7 +6,6 @@ import os
 import yaml
 import pytest
 from openai import OpenAI
-from openai import BadRequestError
 from dotenv import load_dotenv
 
 #import deepeval
@@ -37,6 +36,7 @@ if not api_key:
 client = OpenAI(api_key=api_key)
 
 MODEL ="gpt-5-nano"  # default to gpt-5-nano
+print(f"🚀 Using model: {MODEL}")
 
 def load_dataset(path: str) -> list:
     with open(path, "r", encoding="utf-8") as f:
