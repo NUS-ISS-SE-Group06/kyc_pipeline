@@ -109,7 +109,7 @@ jobs:
       # Run all DeepEval tests under ./evals
       - name: Run DeepEval
         run: |
-          uv run deepeval test run evals --report || EXIT=$?
+          uv run deepeval test run evals || EXIT=$?
           echo "DeepEval exit code: ${EXIT:-0}"
           exit 0
 
