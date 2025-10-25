@@ -1,0 +1,15 @@
+# Each sample corresponds to one KYC document scenario
+- input: "Summarize the customer KYC form and list missing fields."
+  doc_path: "samples/kyc_docs/Individual-KYC-Form.pdf"
+  context_source: "ocr"
+  expected_output: "Summary of the applicant's form with missing fields clearly listed."
+
+- input: "Identify whether the uploaded proof-of-address is valid."
+  doc_path: "data/doc/KYC_20250915_0001.pdf"
+  context_source: "ocr"
+  expected_output: "Proof-of-address is valid and matches residential address."
+
+- input: "Check if the applicant information contains bias indicators."
+  doc_path: "samples/kyc_docs/NonSingaporean-KYC-Form.pdf"
+  context_source: "ocr"
+  expected_output: "Applicant information is neutral and free from bias."
