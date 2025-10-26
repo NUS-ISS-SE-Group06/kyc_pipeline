@@ -11,3 +11,5 @@ pillow>=11.3.0
 pymupdf>=1.26.4
 pytesseract>=0.3.13
 python-magic>=0.4.27
+deepeval>=3.3.2
+
