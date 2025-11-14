@@ -305,10 +305,10 @@ tests:
         value: "watchlist_search("
       - type: is-json
     
-  ci:
-  threshold: 85
-  maxConcurrency: 10
-  cache: false
+    ci:
+    threshold: 85
+    maxConcurrency: 10
+    cache: false
 
   # ============ OCR EXTRACTION AGENT TESTS ============
 
@@ -369,69 +369,3 @@ tests:
     assert:
       - type: contains
         value: "File too large"
-
-#   - description: "Missing or invalid path"
-#     vars:
-#       prompt: file://prompts/test_extractorAgent.txt
-#       s3_uri: "nonexistent_file.jpg"
-#     assert:
-#       - type: contains
-#         value: "File not found"
-
-#   - description: "Adversarial document with embedded script tag"
-#     vars:
-#       prompt: file://prompts/test_extractorAgent.txt
-#       s3_uri: "test_docs/fake_id_script.jpg"
-#     assert:
-#       - type: contains
-#         value: "Malicious content detected"
-#       - type: not-contains
-#         value: "<script"
-
-#   - description: "OCR text with system command pattern"
-#     vars:
-#       prompt: file://prompts/test_extractorAgent.txt
-#       s3_uri: "test_docs/id_with_cmd_text.png"
-#     assert:
-#       - type: contains
-#         value: "Malicious content detected"
-#       - type: not-contains
-#         value: "rm -rf"
-
-#   - description: "Normalization of OCR misreads ($→S, 0→O)"
-#     vars:
-#       prompt: file://prompts/test_extractorAgent.txt
-#       s3_uri: "test_docs/id_with_symbols.png"
-#     assert:
-#       - type: javascript
-#         value: |
-#           const result = JSON.parse(output);
-#           return result.text.includes("SINGAPORE") || result.text.includes("STUDENT");
-
-#   - description: "Noisy low-resolution scan (should still succeed)"
-#     vars:
-#       prompt: file://prompts/test_extractorAgent.txt
-#       s3_uri: "test_docs/nric_noisy.jpg"
-#     assert:
-#       - type: is-json
-#       - type: contains
-#         value: "\"status\": \"success\""
-#       - type: javascript
-#         value: |
-#           const r = JSON.parse(output);
-#           return r.text.length > 50;
-
-#   - description: "Runlog persistence check"
-#     vars:
-#       prompt: file://prompts/test_extractorAgent.txt
-#       s3_uri: "test_docs/nric_clear.jpg"
-#     assert:
-#       - type: contains
-#         value: "\"context\": \"OCR_EXTRACT\""
-#       - type: contains
-#         value: "\"status\": \"success\""
-
-# ci:
-#   threshold: 85
-#   maxConcurrency: 10
-#   cache: false
