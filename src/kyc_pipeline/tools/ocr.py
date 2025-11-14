@@ -8,6 +8,10 @@ import pytesseract
 from PIL import Image
 import cv2
 
+# import the logging tool from your runlog module
+from kyc_pipeline.tools.runlog import persist_runlog   # CrewAI Tool object
+from datetime import datetime
+
 # --- Optional MIME helpers (graceful fallbacks) ---
 _magic = None
 try:
@@ -150,36 +154,69 @@ def ocr_extract(s3_uri: str) -> str:
     Accepts a local file path (you can map S3 → local before calling).
     """
     image_path = s3_uri  # treat as local path
+    start_time = datetime.utcnow().isoformat()
+    try:
+        # 1) Existence & size
+        if not os.path.exists(image_path):
+            raise FileNotFoundError(f"File not found: {image_path}")
 
-    # 1) Existence & size
-    if not os.path.exists(image_path):
-        raise FileNotFoundError(f"File not found: {image_path}")
+        file_size_mb = os.path.getsize(image_path) / (1024 * 1024)
+        if file_size_mb > MAX_FILE_SIZE_MB:
+            raise ValueError(f"File too large ({file_size_mb:.2f} MB). Limit is {MAX_FILE_SIZE_MB} MB.")
 
-    file_size_mb = os.path.getsize(image_path) / (1024 * 1024)
-    if file_size_mb > MAX_FILE_SIZE_MB:
-        raise ValueError(f"File too large ({file_size_mb:.2f} MB). Limit is {MAX_FILE_SIZE_MB} MB.")
+        # 2) MIME type
+        mime_type = _detect_mime(image_path)
+        if mime_type not in ALLOWED_MIME_TYPES:
+            raise ValueError(f"Unsupported file type: {mime_type}")
 
-    # 2) MIME type
-    mime_type = _detect_mime(image_path)
-    if mime_type not in ALLOWED_MIME_TYPES:
-        raise ValueError(f"Unsupported file type: {mime_type}")
+        # 3) Load → preprocess → OCR
+        if mime_type == "application/pdf":
+            img_bgr = _render_pdf_first_page_to_bgr(image_path)
+        else:
+            img_bgr = cv2.imread(image_path)
+            if img_bgr is None:
+                raise ValueError("Unable to read image (possibly corrupted or unsupported).")
 
-    # 3) Load → preprocess → OCR
-    if mime_type == "application/pdf":
-        img_bgr = _render_pdf_first_page_to_bgr(image_path)
-    else:
-        img_bgr = cv2.imread(image_path)
-        if img_bgr is None:
-            raise ValueError("Unable to read image (possibly corrupted or unsupported).")
+        raw_text = _preprocess_for_ocr(img_bgr)
 
-    raw_text = _preprocess_for_ocr(img_bgr)
+        # 4) Safety check + sanitize
+        safe_text = validate_ocr_text_safety(raw_text)
 
-    # 4) Safety check + sanitize
-    safe_text = validate_ocr_text_safety(raw_text)
+        # 🔹 Apply normalization step here
+        normalized_text = normalize_ocr_text(safe_text)
 
-    # 🔹 Apply normalization step here
-    normalized_text = normalize_ocr_text(safe_text)
+        # ✅ Persist success log
+        persist_runlog.func({
+            "context":"OCR_EXTRACT",
+            "details":{
+                "file_path": image_path,
+                "mime_type": mime_type,
+                "status": "success",
+                "extracted_length": len(normalized_text),
+                "started_at": start_time,
+                "finished_at": datetime.utcnow().isoformat(),
+            },
+        })
+        print("✅ OCR completed successfully.")
+        return {
+            "text": normalized_text,
+            "mime_type": mime_type,
+            "file_size_mb": round(file_size_mb, 2),
+            "status": "success",
+        }
+    except Exception as e:
+        # ❌ Persist failure log
+        persist_runlog.func({
+            "context":"OCR_EXTRACT",
+            "details":{
+                "file_path": image_path,
+                "status": "failed",
+                "error": str(e),
+                "started_at": start_time,
+                "finished_at": datetime.utcnow().isoformat(),
+            },
+        })
+        raise
 
-    # Optional: minimal success log (Crew tools can print to stderr/stdout)
-    print("✅ OCR completed successfully and text sanitized.")
-    return normalized_text
+# Optional bundle for easy import elsewhere
+ocr_tools = [ocr_extract, persist_runlog]

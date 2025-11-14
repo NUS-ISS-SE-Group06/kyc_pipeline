@@ -44,6 +44,7 @@ def test_validate_ocr_text_safety_sanitizes_control_and_spaces():
 
 
 # -------- Happy path (PNG image) --------
+# -------- Happy path (PNG image) --------
 def test_ocr_extract_png_success_func_and_run(tmp_path, monkeypatch):
     png_path = tmp_path / "sample.png"
     _write_png(str(png_path))
@@ -56,12 +57,30 @@ def test_ocr_extract_png_success_func_and_run(tmp_path, monkeypatch):
 
     # call underlying function first
     out_func = ocr_extract.func(str(png_path))
-    assert isinstance(out_func, str)
-    assert out_func == "Hello World"
+
+    # ✅ Handle both old (string) and new (dict) return formats
+    if isinstance(out_func, dict):
+        assert out_func.get("status") == "success"
+        assert "text" in out_func
+        assert isinstance(out_func["text"], str)
+        assert out_func["text"] == "Hello World"
+        # also test mime and metadata presence
+        assert out_func.get("mime_type") == "image/png"
+        out_func_text = out_func["text"]
+    else:
+        assert isinstance(out_func, str)
+        assert out_func == "Hello World"
+        out_func_text = out_func
 
     # run via tool runner too
     out_run = ocr_extract.run(str(png_path))
-    assert out_run == out_func
+
+    # tool runner may also return dict or string
+    if isinstance(out_run, dict):
+        assert out_run["text"] == out_func_text
+    else:
+        assert out_run == out_func_text
+
 
 
 # -------- Error: file not found --------
