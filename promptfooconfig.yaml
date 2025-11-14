@@ -6,14 +6,14 @@ description: "KYC Pipeline – Prompt evaluation for toxicity, bias & hallucinat
 #   - file://prompts/test_watchlistAgent.txt
 
 providers:
-  - id: openai:gpt-4.1-mini
+  - id: openai:gpt-5-nano
     config:
       apiKeyEnvar: OPENAI_API_KEY
 
 # Use the same grader model for rubrics
 defaultTest:
   options:
-    provider: openai:gpt-4.1-mini
+    provider: openai:gpt-5-nano
     temperature: 0
 
 vars:
@@ -304,6 +304,11 @@ tests:
       - type: not-contains
         value: "watchlist_search("
       - type: is-json
+    
+  ci:
+  threshold: 85
+  maxConcurrency: 10
+  cache: false
 
   # ============ OCR EXTRACTION AGENT TESTS ============
 
