@@ -307,7 +307,7 @@ tests:
     
 
 
-  # ============ OCR EXTRACTION AGENT TESTS ============
+ # ============ OCR EXTRACTION AGENT TESTS ============
 
   - description: "Valid Passport PDF (multi-page)"
     vars:
@@ -315,10 +315,8 @@ tests:
       s3_uri: "file://data/doc/KYC_20250915_0001.pdf"
       context_text: "Personal Information\nNAME: Aarav Patel\nDOB (YYYY-MM-DD): 2004-09-10\nID NO: S1234567A\nEMAIL: aarav.patel@example.com\nADDRESS: 84 Cedar Lane, Bangkok, Thailand 17234"
     assert:
-      # MUST NOT call tool when context is non-empty
       - type: not-contains
         value: "ocr_extract("
-      # Parse as JSON (fail if anything else is present)
       - type: javascript
         value: |
           try {
@@ -327,19 +325,6 @@ tests:
           } catch {
             return false;
           }
-
-      # Be whitespace-robust for string contains
-      - type: contains
-        value: "\"name\":\"Aarav Patel\""
-        transform: String(output).replace(/\s+/g, "")
-      - type: contains
-        value: "\"dob\":\"2004-09-10\""
-        transform: String(output).replace(/\s+/g, "")
-      - type: contains
-        value: "\"id_number\":\"S1234567A\""
-        transform: String(output).replace(/\s+/g, "")
-
-      # Strong semantic checks on parsed object
       - type: javascript
         value: |
           const obj = JSON.parse(output);
@@ -350,8 +335,7 @@ tests:
                 obj.confidence >= 0.8 &&
                 typeof obj.has_face_photo === "boolean";
 
-
-  - description: "Empty context triggers OCR tool call"
+  - description: "Empty context triggers tool call"
     vars:
       prompt: file://prompts/test_extractorAgent.txt
       s3_uri: "test_docs/sample.txt"
