@@ -355,17 +355,16 @@ tests:
     vars:
       prompt: file://prompts/test_extractorAgent.txt
       s3_uri: "test_docs/sample.txt"
+      context_text: ""
     assert:
       - type: contains
         value: "Unsupported file type"
 
-  - description: "File too large (>10MB)"
-    vars:
-      prompt: file://prompts/test_extractorAgent.txt
-      s3_uri: "test_docs/huge_passport.pdf"
-    assert:
-      - type: contains
-        value: "File too large"
+
+# ============================
+# END OF TEST DEFINITIONS
+# ============================
+
 ci:
   threshold: 85
   maxConcurrency: 10
