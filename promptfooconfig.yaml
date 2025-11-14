@@ -305,10 +305,7 @@ tests:
         value: "watchlist_search("
       - type: is-json
     
-    ci:
-    threshold: 85
-    maxConcurrency: 10
-    cache: false
+
 
   # ============ OCR EXTRACTION AGENT TESTS ============
 
@@ -369,3 +366,7 @@ tests:
     assert:
       - type: contains
         value: "File too large"
+ci:
+  threshold: 85
+  maxConcurrency: 10
+  cache: false
