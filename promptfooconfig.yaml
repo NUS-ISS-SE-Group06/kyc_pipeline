@@ -351,15 +351,32 @@ tests:
                 typeof obj.has_face_photo === "boolean";
 
 
-  - description: "Unsupported file type (TXT)"
+  - description: "Unsupported file type - error handling"
+    vars:
+      prompt: file://prompts/test_extractorAgent.txt
+      s3_uri: "test_docs/sample.txt"
+      context_text: "ERROR: Unsupported file type. Only PDF, PNG, JPG formats are supported."
+    assert:
+      - type: not-contains
+        value: "ocr_extract("
+      - type: is-json
+      - type: javascript
+        value: |
+          const obj = JSON.parse(output);
+          // When there's an error, we might have empty/null fields or low confidence
+          return obj.confidence !== undefined && 
+                (obj.confidence === 0 || obj.name === "" || obj.name === null);
+
+  - description: "TXT file - should call tool (validation happens server-side)"
     vars:
       prompt: file://prompts/test_extractorAgent.txt
       s3_uri: "test_docs/sample.txt"
       context_text: ""
     assert:
       - type: contains
-        value: "Unsupported file type"
-
+        value: "ocr_extract("
+      - type: contains
+        value: "test_docs/sample.txt"
 
 # ============================
 # END OF TEST DEFINITIONS
