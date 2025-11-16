@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write  # needed to upload SARIF to Code Scanning
 
 jobs:
   build-cache:
@@ -39,11 +40,6 @@ jobs:
           
       - name: Install dependencies
         run: uv sync --dev
-
-      # - name: Lint with flake8
-      #   run: |
-      #     flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-      #     flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
   test:
     name: 🧪 Run Test
@@ -74,9 +70,58 @@ jobs:
         run: uv sync --dev
 
       - name: Run tests with pytest
-        run: uv run pytest -v
+        run: uv run pytest -v test
         # Optional coverage:
         # run: uv run pytest -v --cov=kyc_pipeline --cov-report=term-missing
+  
+  deepeval-evals:
+    name: 🤖 DeepEval + Confident AI
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            pyproject.toml
+            uv.lock
+        continue-on-error: true
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Prepare env for DeepEval & Confident
+        run: |
+          {
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY_PROMPTFOO }}"
+            echo "CONFIDENT_API_KEY=${{ secrets.CONFIDENT_API_KEY }}"
+          } >> $GITHUB_ENV
+
+      # Run all DeepEval tests under ./evals
+      # - name: Run DeepEval
+      #   run: |
+      #     uv run deepeval test run evals || EXIT=$?
+      #     echo "DeepEval exit code: ${EXIT:-0}"
+      #     exit 0
+
+      - name: Run DeepEval sequentially (per file)
+        shell: bash
+        run: |
+          set -e
+          for f in $(find evals -maxdepth 1 -name 'test_*.py' | sort); do
+            echo "=== Running $f ==="
+            uv run deepeval test run "$f" || true
+          done
+
 
   promptfoo:
     runs-on: ubuntu-latest
@@ -126,3 +171,107 @@ jobs:
             echo "## Promptfoo Summary" >> $GITHUB_STEP_SUMMARY
             cat promptfoo-summary.md >> $GITHUB_STEP_SUMMARY
           fi 
+
+  trivy-fs:
+    name: 🔍 Trivy FS Scan (PR)
+    runs-on: ubuntu-latest
+    needs: promptfoo
+    if: github.event_name == 'pull_request'  #run on push_request 
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Trivy FS → SARIF
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs.sarif
+          security-checks: vuln,config,secret
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '0'   # allow SARIF upload even when findings exist
+
+      - name: Upload SARIF to Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs.sarif
+
+      - name: Enforce gate (fail on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
+          security-checks: vuln,config,secret
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+          skip-setup-trivy: true
+
+  trivy-image:
+    name: 🐳 Trivy Image Scan (push)
+    runs-on: ubuntu-latest
+    needs: promptfoo
+    if: github.event_name != 'pull_request'  # run on push / workflow_dispatch
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare .env for build
+        run: cp .env.example .env
+
+      - name: Set lower-case image name
+        run: |
+          lower=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE=ghcr.io/$lower:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Build image
+        run: docker build -t "$IMAGE" .
+
+      - name: Trivy Image → SARIF
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: image
+          image-ref: ${{ env.IMAGE }}
+          format: sarif
+          output: trivy-image.sarif
+          security-checks: vuln,config,secret
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '0'
+
+      - name: Upload SARIF to Code Scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-image.sarif
+
+      - name: (Optional) Generate SBOM (CycloneDX)
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: image
+          image-ref: ${{ env.IMAGE }}
+          format: cyclonedx
+          output: sbom.cdx.json
+          skip-setup-trivy: true
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: sbom.cdx.json
+
+      - name: Enforce gate (fail on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: image
+          image-ref: ${{ env.IMAGE }}
+          format: table
+          security-checks: vuln,config,secret
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+          skip-setup-trivy: true

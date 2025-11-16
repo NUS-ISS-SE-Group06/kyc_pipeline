@@ -7,6 +7,7 @@ class ExtractedKyc(BaseModel):
     dob: Optional[str]
     address: Optional[str]
     id_number: Optional[str]
+    email: Optional[str]
     has_face_photo: Optional[bool]
     coverage_notes: Optional[str] = None
     confidence: float = 0.0
