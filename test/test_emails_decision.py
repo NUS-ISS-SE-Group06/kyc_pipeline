@@ -1,7 +1,7 @@
 # tests/test_emails_decision_tool.py
 import importlib
 import os
-from typing import Any
+from typing import Any, Tuple
 
 import pytest
 
@@ -26,6 +26,16 @@ def _resolve_tool() -> Any:
         f"{MODULE_PATH}"
     )
     return tool
+
+
+def _base_marker(s: str) -> str:
+    """
+    Normalize tool return strings to their base marker, ignoring any
+    extra annotations (e.g., ' | email-stub:pdf-saved -> ...').
+    """
+    if not isinstance(s, str):
+        return ""
+    return s.split(" | ", 1)[0].strip()
 
 
 def test_tool_is_importable_and_named_correctly():
@@ -60,8 +70,8 @@ def test_stub_path_is_deterministic_when_provider_unset(monkeypatch: pytest.Monk
 
     res = tool.run("Approve", "All KYC checks passed", None)
     assert isinstance(res, str)
-    # default path should be a stub marker
-    assert res.startswith("email-stub")
+    # default path should be a stub marker (allow extra annotations)
+    assert _base_marker(res).startswith("email-stub")
 
 
 def test_smtp_provider_without_creds_falls_back_to_stub(monkeypatch: pytest.MonkeyPatch):
@@ -75,6 +85,8 @@ def test_smtp_provider_without_creds_falls_back_to_stub(monkeypatch: pytest.Monk
 
     res = tool.run("Reject", "Watchlist match", "user@example.com")
     assert isinstance(res, str)
-    # Accept either explicit missing-config marker or generic stub,
-    # depending on your implementation branch.
-    assert res in {"email-stub:missing-smtp-config", "email-stub"}
+
+    # Accept either explicit missing-config marker or generic stub.
+    # Normalize first to tolerate extra annotations from the implementation.
+    base = _base_marker(res)
+    assert base in {"email-stub:missing-smtp-config", "email-stub"}
