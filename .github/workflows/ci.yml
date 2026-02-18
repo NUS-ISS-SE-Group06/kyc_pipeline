@@ -182,7 +182,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Trivy FS → SARIF
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.34.0
         with:
           scan-type: fs
           scan-ref: .
@@ -200,7 +200,7 @@ jobs:
           sarif_file: trivy-fs.sarif
 
       - name: Enforce gate (fail on HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.34.0
         with:
           scan-type: fs
           scan-ref: .
@@ -232,7 +232,7 @@ jobs:
         run: docker build -t "$IMAGE" .
 
       - name: Trivy Image → SARIF
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.34.0
         with:
           scan-type: image
           image-ref: ${{ env.IMAGE }}
@@ -250,7 +250,7 @@ jobs:
           sarif_file: trivy-image.sarif
 
       - name: (Optional) Generate SBOM (CycloneDX)
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.34.0
         with:
           scan-type: image
           image-ref: ${{ env.IMAGE }}
@@ -265,7 +265,7 @@ jobs:
           path: sbom.cdx.json
 
       - name: Enforce gate (fail on HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@0.34.0
         with:
           scan-type: image
           image-ref: ${{ env.IMAGE }}
